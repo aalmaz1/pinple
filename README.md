@@ -2,6 +2,12 @@
 
 공주대학교 천안캠퍼스 학생 전용 소모임 앱. 지도 위에서 주변 소모임을 찾고, 직접 모임을 만들고, 참여를 신청할 수 있습니다.
 
+## About this fork / 이 포크에 대하여
+
+This repository is an optimized fork of our university team project, refined for improved maintainability and deployment readiness.
+
+이 저장소는 저희 대학 팀 프로젝트를 기반으로 유지보수성과 배포 준비성을 개선한 최적화 포크입니다.
+
 ## 주요 기능
 
 - **위치 인증**: 천안캠퍼스 반경 2km 이내에서만 앱 사용 가능
