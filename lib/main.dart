@@ -12,8 +12,14 @@ void main() async {
     options: DefaultFirebaseOptions.currentPlatform,
   );
 
+  // Client ID via --dart-define=NAVER_MAP_CLIENT_ID=xxx , fallback for local dev
+  const naverClientId = String.fromEnvironment(
+    'NAVER_MAP_CLIENT_ID',
+    defaultValue: 'num7515n0d',
+  );
+
   await FlutterNaverMap().init(
-    clientId: 'num7515n0d',
+    clientId: naverClientId,
     onAuthFailed: (ex) {
       debugPrint('===== NaverMap auth failed =====');
       debugPrint('type: ${ex.runtimeType}');

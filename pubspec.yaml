@@ -12,26 +12,25 @@ dependencies:
 
   cupertino_icons: ^1.0.8
 
-  # Firebase
-  firebase_core: any
-  firebase_auth: any
-  cloud_firestore: any
+  # Firebase — pinned for reproducible builds & supply-chain safety
+  firebase_core: ^4.6.0
+  firebase_auth: ^6.3.0
+  cloud_firestore: ^6.2.0
 
   # State Management
-  flutter_riverpod: any
+  flutter_riverpod: ^3.3.1
 
   # Navigation
-  go_router: any
+  go_router: ^17.2.0
 
   # Map
-  flutter_naver_map: any
+  flutter_naver_map: ^1.4.4
 
-  # Location
-  geolocator: any
-  permission_handler: any
+  # Location — geolocator handles permission internally, permission_handler not needed
+  geolocator: ^14.0.2
 
-  # Fonts
-  google_fonts: any
+  # Fonts — consider bundling NotoSansKR locally instead of google_fonts for offline-first
+  google_fonts: ^8.1.0
 
 dev_dependencies:
   flutter_test:

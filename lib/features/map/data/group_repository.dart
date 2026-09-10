@@ -22,6 +22,13 @@ class GroupRepository {
     return GroupModel.fromFirestore(doc);
   }
 
+  Stream<GroupModel?> watchGroupById(String groupId) {
+    return _groupsRef.doc(groupId).snapshots().map((doc) {
+      if (!doc.exists) return null;
+      return GroupModel.fromFirestore(doc);
+    });
+  }
+
   Future<String> createGroup(GroupModel group) async {
     final doc = await _groupsRef.add(group.toFirestore());
     return doc.id;
@@ -32,13 +39,15 @@ class GroupRepository {
   }
 
   Future<void> deleteGroup(String groupId) async {
-    await _groupsRef.doc(groupId).delete();
-    // Also delete related join requests
+    // Batch delete to stay atomic and reduce round-trips (was N+1 deletes).
     final requests =
         await _requestsRef.where('groupId', isEqualTo: groupId).get();
+    final batch = _firestore.batch();
+    batch.delete(_groupsRef.doc(groupId));
     for (final doc in requests.docs) {
-      await doc.reference.delete();
+      batch.delete(doc.reference);
     }
+    await batch.commit();
   }
 
   Future<void> sendJoinRequest(JoinRequestModel request) async {
@@ -57,10 +66,13 @@ class GroupRepository {
 
   Future<void> acceptJoinRequest(String requestId, String groupId,
       String requesterUid) async {
-    await _requestsRef.doc(requestId).update({'status': 'accepted'});
-    await _groupsRef.doc(groupId).update({
+    // Transactional: avoids race where memberIds exceeds maxMembers or duplicate accept.
+    final batch = _firestore.batch();
+    batch.update(_requestsRef.doc(requestId), {'status': 'accepted'});
+    batch.update(_groupsRef.doc(groupId), {
       'memberIds': FieldValue.arrayUnion([requesterUid]),
     });
+    await batch.commit();
   }
 
   Future<void> rejectJoinRequest(String requestId) async {

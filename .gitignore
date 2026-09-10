@@ -15,7 +15,7 @@ build/
 **/android/local.properties
 **/android/**/GeneratedPluginRegistrant.java
 
-# iOS (future)
+# iOS
 **/ios/**/*.mode1v3
 **/ios/**/*.mode2v3
 **/ios/**/*.moved-aside
@@ -31,10 +31,24 @@ build/
 *.swo
 .DS_Store
 
-# Misc
-.metadata
+# Misc - lock files (keep pubspec.lock for reproducible builds)
 *.lock
 !pubspec.lock
+
+# Media / large binaries — never commit videos or archives
+*.mp4
+*.mov
+*.avi
+*.mkv
+*.zip
+*.aab
+*.apk
+*.ipa
+
+# Environment & secrets
+.env
+*.jks
+*.keystore
 
 # OMC working directory
 .omc/state/
@@ -43,3 +57,7 @@ build/
 # Firebase platform configs (regenerate via `flutterfire configure`)
 android/app/google-services.json
 ios/Runner/GoogleService-Info.plist
+ios/firebase_app_id_file.json
+
+# Preview / tool entry — not part of production build
+# lib/main_preview.dart is intentionally kept untracked if used only for screenshots

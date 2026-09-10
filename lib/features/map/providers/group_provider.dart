@@ -11,6 +11,12 @@ final activeGroupsProvider = StreamProvider<List<GroupModel>>((ref) {
 });
 
 final groupDetailProvider =
+    StreamProvider.family<GroupModel?, String>((ref, groupId) {
+  return ref.watch(groupRepositoryProvider).watchGroupById(groupId);
+});
+
+// Keep Future variant for one-shot reads (e.g. edit init) without listening
+final groupDetailFutureProvider =
     FutureProvider.family<GroupModel?, String>((ref, groupId) {
   return ref.watch(groupRepositoryProvider).getGroupById(groupId);
 });
