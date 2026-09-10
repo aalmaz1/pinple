@@ -1,0 +1,109 @@
+name: Build and release APK
+
+on:
+  push:
+    branches:
+      - '**'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Build Android APK
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+
+      - name: Restore Firebase configuration
+        env:
+          GOOGLE_SERVICES_JSON: ${{ secrets.GOOGLE_SERVICES_JSON }}
+        run: |
+          if [ -z "$GOOGLE_SERVICES_JSON" ]; then
+            echo '::error::Add the GOOGLE_SERVICES_JSON repository secret containing android/app/google-services.json.'
+            exit 1
+          fi
+          printf '%s' "$GOOGLE_SERVICES_JSON" > android/app/google-services.json
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          config = json.loads(Path('android/app/google-services.json').read_text())
+          packages = [client.get('client_info', {}).get('android_client_info', {}).get('package_name')
+                      for client in config.get('client', [])]
+          if 'kr.ac.kongju.pinple' not in packages:
+              raise SystemExit('Firebase configuration must include package kr.ac.kongju.pinple')
+          PY
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Install dependencies
+        run: flutter pub get --enforce-lockfile
+
+      - name: Build universal release APK
+        run: flutter build apk --release --build-number="${{ github.run_number }}"
+
+      - name: Save APK for publication
+        uses: actions/upload-artifact@v4
+        with:
+          name: pinple-apk
+          path: build/app/outputs/flutter-apk/app-release.apk
+          if-no-files-found: error
+          retention-days: 7
+
+  release:
+    name: Publish GitHub Release
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+    steps:
+      - name: Download APK
+        uses: actions/download-artifact@v4
+        with:
+          name: pinple-apk
+          path: apk
+
+      - name: Publish APK and checksum
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          COMMIT_SHA: ${{ github.sha }}
+          BRANCH_NAME: ${{ github.ref_name }}
+          RUN_NUMBER: ${{ github.run_number }}
+          RUN_ATTEMPT: ${{ github.run_attempt }}
+        run: |
+          tag="apk-${RUN_NUMBER}-${RUN_ATTEMPT}"
+          filename="pinple-${tag}.apk"
+          mv apk/app-release.apk "$filename"
+          sha256sum "$filename" > "$filename.sha256"
+          cat > release-notes.md <<EOF
+          Automatic Android build.
+
+          - Branch: ${BRANCH_NAME}
+          - Commit: ${COMMIT_SHA}
+          - Build: ${RUN_NUMBER}, attempt: ${RUN_ATTEMPT}
+
+          Download the APK below to install. The universal APK supports all architectures included by Flutter.
+
+          This is a test build signed with a debug key, not a production signing key.
+          The key may change between builds, requiring the previous app to be uninstalled before installation (which removes local app data).
+          EOF
+          gh release create "$tag" "$filename" "$filename.sha256" \
+            --target "$COMMIT_SHA" \
+            --title "Pinple APK #${RUN_NUMBER} (${BRANCH_NAME})" \
+            --notes-file release-notes.md \
+            --prerelease
