@@ -1,11 +1,14 @@
+import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:pinple/core/constants/campus_constants.dart';
 import 'package:pinple/core/utils/validators.dart';
 
 class AuthRepository {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final FirebaseStorage _storage = FirebaseStorage.instance;
 
   Stream<User?> get authStateChanges => _auth.userChanges();
 
@@ -40,10 +43,7 @@ class AuthRepository {
     }
   }
 
-  Future<void> signIn({
-    required String email,
-    required String password,
-  }) async {
+  Future<void> signIn({required String email, required String password}) async {
     final credential = await _auth.signInWithEmailAndPassword(
       email: email,
       password: password,
@@ -75,5 +75,15 @@ class AuthRepository {
   Future<Map<String, dynamic>?> getUserData(String uid) async {
     final doc = await _firestore.collection('users').doc(uid).get();
     return doc.data();
+  }
+
+  Future<String> uploadProfileImage(String uid, File imageFile) async {
+    final ref = _storage.ref().child('profile_images').child('$uid.jpg');
+    await ref.putFile(imageFile);
+    final url = await ref.getDownloadURL();
+
+    await _firestore.collection('users').doc(uid).update({'photoUrl': url});
+
+    return url;
   }
 }

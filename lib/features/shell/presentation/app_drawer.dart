@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:pinple/core/localization/app_localizations.dart';
 import 'package:pinple/core/theme/app_theme.dart';
 import 'package:pinple/features/auth/providers/auth_provider.dart';
 
@@ -11,15 +12,18 @@ class AppDrawer extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final user = FirebaseAuth.instance.currentUser;
-    final userDataAsync =
-        user == null ? null : ref.watch(userDataProvider(user.uid));
+    final userDataAsync = user == null
+        ? null
+        : ref.watch(userDataProvider(user.uid));
+
     final displayName =
         userDataAsync?.value?['displayName'] as String? ?? '사용자';
-    final email = user?.email ?? '';
+    final photoUrl = userDataAsync?.value?['photoUrl'] as String?;
     final initial = displayName.isNotEmpty ? displayName[0] : '?';
+    final l10n = ref.watch(l10nProvider);
 
     return Drawer(
-      backgroundColor: AppColors.bg,
+      backgroundColor: Theme.of(context).colorScheme.surface,
       shape: const RoundedRectangleBorder(),
       child: SafeArea(
         child: Column(
@@ -36,15 +40,24 @@ class AppDrawer extends ConsumerWidget {
                 children: [
                   CircleAvatar(
                     radius: 24,
-                    backgroundColor: AppColors.primarySoft,
-                    child: Text(
-                      initial,
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w700,
-                        color: AppColors.primary,
-                      ),
-                    ),
+                    backgroundColor: Theme.of(
+                      context,
+                    ).colorScheme.primaryContainer,
+                    backgroundImage: photoUrl != null
+                        ? NetworkImage(photoUrl)
+                        : null,
+                    child: photoUrl == null
+                        ? Text(
+                            initial,
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w700,
+                              color: Theme.of(
+                                context,
+                              ).colorScheme.onPrimaryContainer,
+                            ),
+                          )
+                        : null,
                   ),
                   const SizedBox(width: AppSpacing.md),
                   Expanded(
@@ -55,24 +68,17 @@ class AppDrawer extends ConsumerWidget {
                           displayName,
                           style: Theme.of(context).textTheme.titleMedium,
                         ),
-                        const SizedBox(height: AppSpacing.xs),
-                        Text(
-                          email,
-                          style: Theme.of(context).textTheme.bodySmall,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
                       ],
                     ),
                   ),
                 ],
               ),
             ),
-            const Divider(color: AppColors.borderSubtle, height: 1),
+            const Divider(height: 1),
             const SizedBox(height: AppSpacing.sm),
             _DrawerItem(
               icon: Icons.list_rounded,
-              label: '주변 모임',
+              label: l10n.groupList,
               onTap: () {
                 Navigator.pop(context);
                 context.push('/list');
@@ -80,17 +86,25 @@ class AppDrawer extends ConsumerWidget {
             ),
             _DrawerItem(
               icon: Icons.person_rounded,
-              label: '내 정보',
+              label: l10n.profile,
               onTap: () {
                 Navigator.pop(context);
                 context.push('/profile');
               },
             ),
+            _DrawerItem(
+              icon: Icons.settings_rounded,
+              label: l10n.settings,
+              onTap: () {
+                Navigator.pop(context);
+                context.push('/settings');
+              },
+            ),
             const Spacer(),
-            const Divider(color: AppColors.borderSubtle, height: 1),
+            const Divider(height: 1),
             _DrawerItem(
               icon: Icons.logout_rounded,
-              label: '로그아웃',
+              label: l10n.logout,
               destructive: true,
               onTap: () async {
                 Navigator.pop(context);
@@ -120,7 +134,9 @@ class _DrawerItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color = destructive ? AppColors.error : AppColors.textStrong;
+    final color = destructive
+        ? AppColors.error
+        : Theme.of(context).colorScheme.onSurface;
     return InkWell(
       onTap: onTap,
       child: Padding(
@@ -135,9 +151,9 @@ class _DrawerItem extends StatelessWidget {
             Text(
               label,
               style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                    color: color,
-                    fontWeight: FontWeight.w500,
-                  ),
+                color: color,
+                fontWeight: FontWeight.w500,
+              ),
             ),
           ],
         ),

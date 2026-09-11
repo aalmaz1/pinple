@@ -24,7 +24,7 @@ class GroupCard extends StatelessWidget {
     final icon = categoryIcon(group.category);
 
     return Material(
-      color: AppColors.bg,
+      color: theme.colorScheme.surface,
       borderRadius: BorderRadius.circular(AppRadius.lg),
       child: InkWell(
         onTap: onTap,
@@ -32,9 +32,12 @@ class GroupCard extends StatelessWidget {
         child: Container(
           padding: const EdgeInsets.all(AppSpacing.lg),
           decoration: BoxDecoration(
-            color: AppColors.bg,
+            color: theme.colorScheme.surface,
             borderRadius: BorderRadius.circular(AppRadius.lg),
-            border: Border.all(color: AppColors.borderSubtle, width: 1),
+            border: Border.all(
+              color: theme.colorScheme.outlineVariant,
+              width: 1,
+            ),
           ),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,

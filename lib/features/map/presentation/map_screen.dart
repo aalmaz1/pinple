@@ -3,6 +3,7 @@ import 'package:flutter_naver_map/flutter_naver_map.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:pinple/core/constants/campus_constants.dart';
+import 'package:pinple/core/localization/app_localizations.dart';
 import 'package:pinple/core/theme/app_theme.dart';
 import 'package:pinple/core/utils/category_helpers.dart';
 import 'package:pinple/features/map/domain/group_model.dart';
@@ -22,8 +23,13 @@ class _MapScreenState extends ConsumerState<MapScreen> {
 
   @override
   Widget build(BuildContext context) {
-    ref.listen(activeGroupsProvider, (_, next) {
-      next.whenData(_setMarkers);
+    final l10n = ref.watch(l10nProvider);
+
+    // Optimization: Listen only to data changes, not the whole state
+    ref.listen(activeGroupsProvider, (previous, next) {
+      if (next.hasValue && next.value != previous?.value) {
+        _setMarkers(next.value!);
+      }
     });
 
     return Scaffold(
@@ -31,23 +37,26 @@ class _MapScreenState extends ConsumerState<MapScreen> {
       extendBodyBehindAppBar: true,
       body: Stack(
         children: [
-          NaverMap(
-            options: const NaverMapViewOptions(
-              initialCameraPosition: NCameraPosition(
-                target: NLatLng(
-                  CampusConstants.latitude,
-                  CampusConstants.longitude,
+          RepaintBoundary(
+            child: NaverMap(
+              options: const NaverMapViewOptions(
+                initialCameraPosition: NCameraPosition(
+                  target: NLatLng(
+                    CampusConstants.latitude,
+                    CampusConstants.longitude,
+                  ),
+                  zoom: 15.5,
                 ),
-                zoom: 15.5,
+                mapType: NMapType.basic,
+                locationButtonEnable: true,
+                logoClickEnable: false,
               ),
-              mapType: NMapType.basic,
-              locationButtonEnable: true,
-              logoClickEnable: false,
+              onMapReady: (controller) {
+                _mapController = controller;
+                final groups = ref.read(activeGroupsProvider).value;
+                if (groups != null) _setMarkers(groups);
+              },
             ),
-            onMapReady: (controller) {
-              _mapController = controller;
-              ref.read(activeGroupsProvider).whenData(_setMarkers);
-            },
           ),
           Positioned(
             top: MediaQuery.of(context).padding.top + AppSpacing.md,
@@ -72,9 +81,9 @@ class _MapScreenState extends ConsumerState<MapScreen> {
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => context.push('/group/create'),
         icon: const Icon(Icons.add_rounded),
-        label: const Text(
-          '모임 만들기',
-          style: TextStyle(fontWeight: FontWeight.w700),
+        label: Text(
+          l10n.createGroup,
+          style: const TextStyle(fontWeight: FontWeight.w700),
         ),
         backgroundColor: AppColors.primary,
         foregroundColor: Colors.white,
@@ -110,7 +119,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
   void _showGroupBottomSheet(GroupModel group) {
     showModalBottomSheet(
       context: context,
-      backgroundColor: AppColors.bg,
+      backgroundColor: Theme.of(context).colorScheme.surface,
       builder: (_) => GroupBottomSheet(
         group: group,
         onDetailTap: () {
@@ -131,7 +140,7 @@ class _CircleIconButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: AppColors.bg,
+      color: Theme.of(context).colorScheme.surface,
       shape: const CircleBorder(),
       elevation: 4,
       shadowColor: Colors.black26,
@@ -142,7 +151,11 @@ class _CircleIconButton extends StatelessWidget {
           width: 44,
           height: 44,
           alignment: Alignment.center,
-          child: Icon(icon, size: 22, color: AppColors.textStrong),
+          child: Icon(
+            icon,
+            size: 22,
+            color: Theme.of(context).colorScheme.onSurface,
+          ),
         ),
       ),
     );

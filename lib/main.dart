@@ -3,14 +3,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter_naver_map/flutter_naver_map.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pinple/app.dart';
+import 'package:pinple/features/settings/providers/settings_provider.dart';
 import 'package:pinple/firebase_options.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
+  final prefs = await SharedPreferences.getInstance();
+
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
   await FlutterNaverMap().init(
     clientId: 'num7515n0d',
@@ -23,8 +25,9 @@ void main() async {
   );
 
   runApp(
-    const ProviderScope(
-      child: PinpleApp(),
+    ProviderScope(
+      overrides: [sharedPreferencesProvider.overrideWithValue(prefs)],
+      child: const PinpleApp(),
     ),
   );
 }

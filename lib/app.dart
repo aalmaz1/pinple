@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:pinple/core/theme/app_theme.dart';
@@ -11,6 +12,8 @@ import 'package:pinple/features/map/presentation/group_detail_screen.dart';
 import 'package:pinple/features/map/presentation/group_list_screen.dart';
 import 'package:pinple/features/map/presentation/map_screen.dart';
 import 'package:pinple/features/profile/presentation/profile_screen.dart';
+import 'package:pinple/features/settings/presentation/settings_screen.dart';
+import 'package:pinple/features/settings/providers/settings_provider.dart';
 import 'package:pinple/features/shell/presentation/location_gate.dart';
 
 final routerProvider = Provider<GoRouter>((ref) {
@@ -42,14 +45,8 @@ final routerProvider = Provider<GoRouter>((ref) {
       return null;
     },
     routes: [
-      GoRoute(
-        path: '/login',
-        builder: (_, _) => const LoginScreen(),
-      ),
-      GoRoute(
-        path: '/signup',
-        builder: (_, _) => const SignUpScreen(),
-      ),
+      GoRoute(path: '/login', builder: (_, _) => const LoginScreen()),
+      GoRoute(path: '/signup', builder: (_, _) => const SignUpScreen()),
       GoRoute(
         path: '/verify-email',
         builder: (_, _) => const EmailVerifyScreen(),
@@ -57,18 +54,10 @@ final routerProvider = Provider<GoRouter>((ref) {
       ShellRoute(
         builder: (_, _, child) => LocationGate(child: child),
         routes: [
-          GoRoute(
-            path: '/map',
-            builder: (_, _) => const MapScreen(),
-          ),
-          GoRoute(
-            path: '/list',
-            builder: (_, _) => const GroupListScreen(),
-          ),
-          GoRoute(
-            path: '/profile',
-            builder: (_, _) => const ProfileScreen(),
-          ),
+          GoRoute(path: '/map', builder: (_, _) => const MapScreen()),
+          GoRoute(path: '/list', builder: (_, _) => const GroupListScreen()),
+          GoRoute(path: '/profile', builder: (_, _) => const ProfileScreen()),
+          GoRoute(path: '/settings', builder: (_, _) => const SettingsScreen()),
         ],
       ),
       GoRoute(
@@ -77,15 +66,13 @@ final routerProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(
         path: '/group/:id',
-        builder: (_, state) => GroupDetailScreen(
-          groupId: state.pathParameters['id']!,
-        ),
+        builder: (_, state) =>
+            GroupDetailScreen(groupId: state.pathParameters['id']!),
       ),
       GoRoute(
         path: '/group/:id/edit',
-        builder: (_, state) => GroupCreateScreen(
-          groupId: state.pathParameters['id'],
-        ),
+        builder: (_, state) =>
+            GroupCreateScreen(groupId: state.pathParameters['id']),
       ),
     ],
   );
@@ -97,12 +84,33 @@ class PinpleApp extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final router = ref.watch(routerProvider);
+    final settings = ref.watch(settingsProvider);
 
     return MaterialApp.router(
       title: 'Pinple',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.lightTheme,
+      darkTheme: AppTheme.darkTheme,
+      themeMode: _mapThemeMode(settings.themeMode),
+      locale: settings.locale,
+      supportedLocales: const [Locale('ko'), Locale('en'), Locale('ru')],
+      localizationsDelegates: const [
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
       routerConfig: router,
     );
+  }
+
+  ThemeMode _mapThemeMode(AppThemeMode mode) {
+    switch (mode) {
+      case AppThemeMode.light:
+        return ThemeMode.light;
+      case AppThemeMode.dark:
+        return ThemeMode.dark;
+      case AppThemeMode.system:
+        return ThemeMode.system;
+    }
   }
 }

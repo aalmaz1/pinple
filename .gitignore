@@ -1,10 +1,12 @@
 # Flutter
 .dart_tool/
+.flutter-preferences
 .flutter-plugins
 .flutter-plugins-dependencies
 .packages
 build/
 *.iml
+pubspec_overrides.yaml
 
 # Android
 **/android/**/gradle-wrapper.jar
@@ -14,8 +16,15 @@ build/
 **/android/gradlew.bat
 **/android/local.properties
 **/android/**/GeneratedPluginRegistrant.java
+# Signing keys and sensitive configs
+*.jks
+*.keystore
+*.p12
+*.pem
+google-services.json
+**/android/app/google-services.json
 
-# iOS (future)
+# iOS
 **/ios/**/*.mode1v3
 **/ios/**/*.mode2v3
 **/ios/**/*.moved-aside
@@ -24,22 +33,32 @@ build/
 **/ios/**/DerivedData/
 **/ios/.symlinks/
 **/ios/**/Pods/
+**/ios/Flutter/.last_build_id
+**/ios/Runner/GoogleService-Info.plist
 
-# IDE
+# IDE & OS
 .idea/
+.vscode/
 *.swp
 *.swo
 .DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Media (large files)
+*.mp4
+*.mov
+*.avi
 
 # Misc
 .metadata
 *.lock
 !pubspec.lock
 
-# OMC working directory
-.omc/state/
-.omc/project-memory.json
-
-# Firebase platform configs (regenerate via `flutterfire configure`)
-android/app/google-services.json
-ios/Runner/GoogleService-Info.plist
+# OMC
+.omc/
