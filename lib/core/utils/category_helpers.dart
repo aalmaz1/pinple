@@ -1,40 +1,48 @@
 import 'package:flutter/material.dart';
-import 'package:pinple/core/constants/app_constants.dart';
 import 'package:pinple/core/theme/app_theme.dart';
+import 'package:pinple/core/localization/app_localizations.dart';
 
-Color categoryColor(String label) {
-  switch (label) {
-    case '스터디':
+Color categoryColor(String categoryId) {
+  switch (categoryId) {
+    case 'study':
       return AppColors.categoryStudy;
-    case '운동':
+    case 'exercise':
       return AppColors.categoryExercise;
-    case '밥약':
+    case 'meal':
       return AppColors.categoryMeal;
-    case '취미':
+    case 'hobby':
       return AppColors.categoryHobby;
     default:
       return AppColors.categoryOther;
   }
 }
 
-IconData categoryIcon(String label) {
-  switch (label) {
-    case '스터디':
+IconData categoryIcon(String categoryId) {
+  switch (categoryId) {
+    case 'study':
       return Icons.menu_book_rounded;
-    case '운동':
+    case 'exercise':
       return Icons.sports_basketball_rounded;
-    case '밥약':
+    case 'meal':
       return Icons.restaurant_rounded;
-    case '취미':
+    case 'hobby':
       return Icons.palette_rounded;
     default:
       return Icons.tag_rounded;
   }
 }
 
-GroupCategory? categoryFromLabel(String label) {
-  for (final c in GroupCategory.values) {
-    if (c.label == label) return c;
+String localizedCategory(String categoryId, L10n l10n) {
+  switch (categoryId) {
+    case 'study':
+      return l10n.catStudy;
+    case 'exercise':
+      return l10n.catExercise;
+    case 'meal':
+      return l10n.catMeal;
+    case 'hobby':
+      return l10n.catHobby;
+    default:
+      return l10n.catOther;
   }
-  return null;
 }

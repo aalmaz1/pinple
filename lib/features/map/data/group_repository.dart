@@ -12,8 +12,11 @@ class GroupRepository {
     return _groupsRef
         .where('isActive', isEqualTo: true)
         .snapshots()
-        .map((snapshot) =>
-            snapshot.docs.map((doc) => GroupModel.fromFirestore(doc)).toList());
+        .map(
+          (snapshot) => snapshot.docs
+              .map((doc) => GroupModel.fromFirestore(doc))
+              .toList(),
+        );
   }
 
   Future<GroupModel?> getGroupById(String groupId) async {
@@ -34,8 +37,9 @@ class GroupRepository {
   Future<void> deleteGroup(String groupId) async {
     await _groupsRef.doc(groupId).delete();
     // Also delete related join requests
-    final requests =
-        await _requestsRef.where('groupId', isEqualTo: groupId).get();
+    final requests = await _requestsRef
+        .where('groupId', isEqualTo: groupId)
+        .get();
     for (final doc in requests.docs) {
       await doc.reference.delete();
     }
@@ -50,13 +54,18 @@ class GroupRepository {
         .where('groupId', isEqualTo: groupId)
         .where('status', isEqualTo: 'pending')
         .snapshots()
-        .map((snapshot) => snapshot.docs
-            .map((doc) => JoinRequestModel.fromFirestore(doc))
-            .toList());
+        .map(
+          (snapshot) => snapshot.docs
+              .map((doc) => JoinRequestModel.fromFirestore(doc))
+              .toList(),
+        );
   }
 
-  Future<void> acceptJoinRequest(String requestId, String groupId,
-      String requesterUid) async {
+  Future<void> acceptJoinRequest(
+    String requestId,
+    String groupId,
+    String requesterUid,
+  ) async {
     await _requestsRef.doc(requestId).update({'status': 'accepted'});
     await _groupsRef.doc(groupId).update({
       'memberIds': FieldValue.arrayUnion([requesterUid]),
@@ -67,11 +76,20 @@ class GroupRepository {
     await _requestsRef.doc(requestId).update({'status': 'rejected'});
   }
 
+  Future<void> leaveGroup(String groupId, String userId) async {
+    await _groupsRef.doc(groupId).update({
+      'memberIds': FieldValue.arrayRemove([userId]),
+    });
+  }
+
   Stream<List<GroupModel>> getMyGroups(String userId) {
     return _groupsRef
         .where('memberIds', arrayContains: userId)
         .snapshots()
-        .map((snapshot) =>
-            snapshot.docs.map((doc) => GroupModel.fromFirestore(doc)).toList());
+        .map(
+          (snapshot) => snapshot.docs
+              .map((doc) => GroupModel.fromFirestore(doc))
+              .toList(),
+        );
   }
 }

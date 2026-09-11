@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:pinple/core/localization/app_localizations.dart';
 import 'package:pinple/core/theme/app_theme.dart';
 import 'package:pinple/core/utils/category_helpers.dart';
 import 'package:pinple/core/widgets/app_widgets.dart';
 import 'package:pinple/features/map/domain/group_model.dart';
 
-class GroupBottomSheet extends StatelessWidget {
+class GroupBottomSheet extends ConsumerWidget {
   final GroupModel group;
   final VoidCallback onDetailTap;
 
@@ -15,8 +17,9 @@ class GroupBottomSheet extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
+    final l10n = ref.watch(l10nProvider);
     final color = categoryColor(group.category);
     final icon = categoryIcon(group.category);
 
@@ -37,26 +40,31 @@ class GroupBottomSheet extends StatelessWidget {
                   children: [
                     Row(
                       children: [
-                        CategoryChip(label: group.category, color: color),
+                        CategoryChip(
+                          label: localizedCategory(group.category, l10n),
+                          color: color,
+                        ),
                         const Spacer(),
                         Icon(
                           Icons.people_rounded,
                           size: 14,
-                          color: AppColors.textSubtle,
+                          color: theme.colorScheme.onSurfaceVariant,
                         ),
                         const SizedBox(width: AppSpacing.xs),
                         Text(
-                          '${group.memberIds.length}/${group.maxMembers}명',
-                          style: theme.textTheme.labelMedium
-                              ?.copyWith(color: AppColors.textSubtle),
+                          '${group.memberIds.length}/${group.maxMembers}${l10n.language == 'ko' ? '명' : ''}',
+                          style: theme.textTheme.labelMedium?.copyWith(
+                            color: theme.colorScheme.onSurfaceVariant,
+                          ),
                         ),
                       ],
                     ),
                     const SizedBox(height: AppSpacing.xs),
                     Text(
                       group.title,
-                      style: theme.textTheme.titleLarge
-                          ?.copyWith(fontWeight: FontWeight.w700),
+                      style: theme.textTheme.titleLarge?.copyWith(
+                        fontWeight: FontWeight.w700,
+                      ),
                     ),
                   ],
                 ),
@@ -75,8 +83,9 @@ class GroupBottomSheet extends StatelessWidget {
               Expanded(
                 child: Text(
                   group.locationName,
-                  style: theme.textTheme.bodyMedium
-                      ?.copyWith(color: AppColors.textSubtle),
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    color: AppColors.textSubtle,
+                  ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -95,7 +104,7 @@ class GroupBottomSheet extends StatelessWidget {
             width: double.infinity,
             child: ElevatedButton(
               onPressed: onDetailTap,
-              child: const Text('자세히 보기'),
+              child: Text(l10n.language == 'ko' ? '자세히 보기' : 'Show Details'),
             ),
           ),
         ],

@@ -46,6 +46,27 @@ class L10n {
   String get submit => get('submit');
   String get update => get('update');
   String get pickLocationOnMap => get('pickLocationOnMap');
+
+  // Categories
+  String get catStudy => get('catStudy');
+  String get catExercise => get('catExercise');
+  String get catMeal => get('catMeal');
+  String get catHobby => get('catHobby');
+  String get catOther => get('catOther');
+
+  // New actions
+  String get leaveGroup => get('leaveGroup');
+  String get leaveConfirmTitle => get('leaveConfirmTitle');
+  String get leaveConfirmMessage => get('leaveConfirmMessage');
+  String get cancel => get('cancel');
+  String get confirm => get('confirm');
+  String get joining => get('joining');
+  String get joinRequestSent => get('joinRequestSent');
+  String get joined => get('joined');
+  String get fullMembers => get('fullMembers');
+  String get deleteGroup => get('deleteGroup');
+  String get deleteConfirmTitle => get('deleteConfirmTitle');
+  String get deleteConfirmMessage => get('deleteConfirmMessage');
 }
 
 final l10nProvider = Provider<L10n>((ref) {
@@ -97,6 +118,23 @@ const _ko = {
   'submit': '생성하기',
   'update': '수정하기',
   'pickLocationOnMap': '지도에서 장소 선택',
+  'catStudy': '공부',
+  'catExercise': '운동',
+  'catMeal': '밥약',
+  'catHobby': '취미',
+  'catOther': '기타',
+  'leaveGroup': '참여포기',
+  'leaveConfirmTitle': '참여 포기',
+  'leaveConfirmMessage': '정말 이 모임 참여를 포기하시겠습니까?',
+  'cancel': '취소',
+  'confirm': '확인',
+  'joining': '참여 신청',
+  'joinRequestSent': '참여 신청을 보냈습니다',
+  'joined': '참여 중',
+  'fullMembers': '인원이 가득 찼습니다',
+  'deleteGroup': '삭제',
+  'deleteConfirmTitle': '모임 삭제',
+  'deleteConfirmMessage': '정말 이 모임을 삭제하시겠습니까?',
 };
 
 const _en = {
@@ -134,6 +172,23 @@ const _en = {
   'submit': 'Create',
   'update': 'Update',
   'pickLocationOnMap': 'Select on Map',
+  'catStudy': 'Study',
+  'catExercise': 'Exercise',
+  'catMeal': 'Meal',
+  'catHobby': 'Hobby',
+  'catOther': 'Other',
+  'leaveGroup': 'Leave Group',
+  'leaveConfirmTitle': 'Leave Group',
+  'leaveConfirmMessage': 'Are you sure you want to leave this group?',
+  'cancel': 'Cancel',
+  'confirm': 'Confirm',
+  'joining': 'Join Request',
+  'joinRequestSent': 'Join request sent',
+  'joined': 'Joined',
+  'fullMembers': 'Group is full',
+  'deleteGroup': 'Delete',
+  'deleteConfirmTitle': 'Delete Group',
+  'deleteConfirmMessage': 'Are you sure you want to delete this group?',
 };
 
 const _ru = {
@@ -141,34 +196,51 @@ const _ru = {
   'settings': 'Настройки',
   'profile': 'Мой профиль',
   'map': 'Карта',
-  'groupList': 'Группы рядом',
+  'groupList': 'Список встреч',
   'logout': 'Выйти',
   'language': 'Язык',
   'theme': 'Тема',
   'light': 'Светлая',
   'dark': 'Темная',
   'system': 'Системная',
-  'myGroups': 'Мои группы',
-  'createGroup': 'Создать группу',
-  'editGroup': 'Редактировать группу',
+  'myGroups': 'Мои встречи',
+  'createGroup': 'Создать встречу',
+  'editGroup': 'Редактировать',
   'nickname': 'Никнейм',
   'email': 'Электронная почта',
   'themeSettings': 'Настройки темы',
   'languageSettings': 'Настройки языка',
-  'distanceSortHint': 'Сортировка по расстоянию',
-  'errorLoadingGroups': 'Ошибка загрузки групп',
-  'noGroupsYet': 'Групп пока нет',
+  'distanceSortHint': 'Сначала ближайшие',
+  'errorLoadingGroups': 'Не удалось загрузить встречи',
+  'noGroupsYet': 'Пока встреч нет',
   'infoLoadError': 'Ошибка загрузки профиля',
-  'noJoinedGroups': 'Вы пока не вступили в группы',
-  'joinHint': 'Найдите интересную группу на вкладке рядом',
+  'noJoinedGroups': 'Вы еще не вступили ни в одну компанию',
+  'joinHint': 'Найдите интересную компанию поблизости',
   'pickPhoto': 'Выбрать фото',
-  'groupTitle': 'Название группы',
+  'groupTitle': 'Название встречи',
   'groupDescription': 'Описание',
-  'locationName': 'Название места',
-  'selectLocation': 'Пожалуйста, выберите место',
+  'locationName': 'Место встречи',
+  'selectLocation': 'Выберите место встречи',
   'category': 'Категория',
   'maxMembers': 'Макс. участников',
   'submit': 'Создать',
   'update': 'Обновить',
   'pickLocationOnMap': 'Выбрать на карте',
+  'catStudy': 'Учеба',
+  'catExercise': 'Спорт',
+  'catMeal': 'Поесть вместе',
+  'catHobby': 'Хобби',
+  'catOther': 'Другое',
+  'leaveGroup': 'Отменить участие',
+  'leaveConfirmTitle': 'Отказ от участия',
+  'leaveConfirmMessage': 'Вы уверены, что хотите отменить свое участие?',
+  'cancel': 'Отмена',
+  'confirm': 'Подтвердить',
+  'joining': 'Участвовать',
+  'joinRequestSent': 'Заявка отправлена',
+  'joined': 'Вы участвуете',
+  'fullMembers': 'Группа заполнена',
+  'deleteGroup': 'Удалить',
+  'deleteConfirmTitle': 'Удалить встречу',
+  'deleteConfirmMessage': 'Вы уверены, что хотите удалить эту встречу?',
 };

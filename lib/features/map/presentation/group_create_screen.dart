@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:pinple/core/constants/app_constants.dart';
 import 'package:pinple/core/constants/campus_constants.dart';
+import 'package:pinple/core/localization/app_localizations.dart';
 import 'package:pinple/core/theme/app_theme.dart';
 import 'package:pinple/core/utils/category_helpers.dart';
 import 'package:pinple/core/widgets/app_widgets.dart';
@@ -26,7 +27,7 @@ class _GroupCreateScreenState extends ConsumerState<GroupCreateScreen> {
   final _titleController = TextEditingController();
   final _descriptionController = TextEditingController();
   final _locationNameController = TextEditingController();
-  String _selectedCategory = GroupCategory.study.label;
+  String _selectedCategory = GroupCategory.study.id;
   int _maxMembers = 4;
   NLatLng? _selectedLocation;
   bool _isLoading = false;
@@ -68,9 +69,10 @@ class _GroupCreateScreenState extends ConsumerState<GroupCreateScreen> {
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
     if (_selectedLocation == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('모임 장소를 선택해주세요')),
-      );
+      final l10n = ref.read(l10nProvider);
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(l10n.selectLocation)));
       return;
     }
 
@@ -78,8 +80,9 @@ class _GroupCreateScreenState extends ConsumerState<GroupCreateScreen> {
 
     try {
       final user = FirebaseAuth.instance.currentUser!;
-      final userData =
-          await ref.read(authRepositoryProvider).getUserData(user.uid);
+      final userData = await ref
+          .read(authRepositoryProvider)
+          .getUserData(user.uid);
 
       if (_isEditMode) {
         await ref.read(groupRepositoryProvider).updateGroup(widget.groupId!, {
@@ -112,9 +115,9 @@ class _GroupCreateScreenState extends ConsumerState<GroupCreateScreen> {
       if (mounted) context.pop();
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('오류: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Error: $e')));
       }
     } finally {
       if (mounted) setState(() => _isLoading = false);
@@ -122,11 +125,11 @@ class _GroupCreateScreenState extends ConsumerState<GroupCreateScreen> {
   }
 
   Future<void> _pickLocation() async {
-    final picked = await showModalBottomSheet<NLatLng>(
-      context: context,
-      isScrollControlled: true,
-      builder: (_) => _LocationPickerSheet(
-        initialLocation: _selectedLocation,
+    final picked = await Navigator.push<NLatLng>(
+      context,
+      MaterialPageRoute(
+        fullscreenDialog: true,
+        builder: (_) => _LocationPickerPage(initialLocation: _selectedLocation),
       ),
     );
     if (picked != null && mounted) {
@@ -137,10 +140,11 @@ class _GroupCreateScreenState extends ConsumerState<GroupCreateScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = ref.watch(l10nProvider);
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(_isEditMode ? '모임 수정' : '모임 만들기'),
+        title: Text(_isEditMode ? l10n.editGroup : l10n.createGroup),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(AppSpacing.xl),
@@ -149,50 +153,36 @@ class _GroupCreateScreenState extends ConsumerState<GroupCreateScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              if (!_isEditMode) ...[
-                PageHeader(
-                  title: '어떤 모임이에요?',
-                  subtitle: '카테고리와 인원을 정해주세요',
-                  padding: const EdgeInsets.only(bottom: AppSpacing.xl),
-                ),
-              ],
-
-              // 모임 이름
+              // Group Name
               TextFormField(
                 controller: _titleController,
-                decoration: const InputDecoration(
-                  labelText: '모임 이름',
-                  hintText: '예: 알고리즘 스터디',
+                decoration: InputDecoration(
+                  labelText: l10n.groupTitle,
+                  hintText: 'ex: Flutter Study',
                 ),
                 validator: (v) =>
-                    v == null || v.isEmpty ? '모임 이름을 입력해주세요' : null,
+                    v == null || v.isEmpty ? l10n.groupTitle : null,
               ),
               const SizedBox(height: AppSpacing.lg),
 
-              // 카테고리
-              Text(
-                '카테고리',
-                style: theme.textTheme.labelLarge,
-              ),
+              // Category
+              Text(l10n.category, style: theme.textTheme.labelLarge),
               const SizedBox(height: AppSpacing.sm),
               Wrap(
                 spacing: AppSpacing.sm,
                 runSpacing: AppSpacing.sm,
                 children: GroupCategory.values.map((c) {
                   return _CategoryOption(
-                    label: c.label,
-                    isSelected: _selectedCategory == c.label,
-                    onTap: () => setState(() => _selectedCategory = c.label),
+                    categoryId: c.id,
+                    isSelected: _selectedCategory == c.id,
+                    onTap: () => setState(() => _selectedCategory = c.id),
                   );
                 }).toList(),
               ),
               const SizedBox(height: AppSpacing.lg),
 
-              // 최대 인원 stepper
-              Text(
-                '최대 인원',
-                style: theme.textTheme.labelLarge,
-              ),
+              // Max Members
+              Text(l10n.maxMembers, style: theme.textTheme.labelLarge),
               const SizedBox(height: AppSpacing.sm),
               Row(
                 children: [
@@ -204,10 +194,11 @@ class _GroupCreateScreenState extends ConsumerState<GroupCreateScreen> {
                   ),
                   Expanded(
                     child: Text(
-                      '$_maxMembers명',
+                      '$_maxMembers${l10n.language == 'ko' ? '명' : ''}',
                       textAlign: TextAlign.center,
-                      style: theme.textTheme.titleMedium
-                          ?.copyWith(fontWeight: FontWeight.w700),
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w700,
+                      ),
                     ),
                   ),
                   _StepperButton(
@@ -220,20 +211,20 @@ class _GroupCreateScreenState extends ConsumerState<GroupCreateScreen> {
               ),
               const SizedBox(height: AppSpacing.lg),
 
-              // 모임 설명
+              // Description
               TextFormField(
                 controller: _descriptionController,
-                decoration: const InputDecoration(
-                  labelText: '모임 설명',
-                  hintText: '어떤 모임인지 설명해주세요',
+                decoration: InputDecoration(
+                  labelText: l10n.groupDescription,
+                  hintText: 'Tell us about the group',
                 ),
                 maxLines: 4,
                 validator: (v) =>
-                    v == null || v.isEmpty ? '설명을 입력해주세요' : null,
+                    v == null || v.isEmpty ? l10n.groupDescription : null,
               ),
               const SizedBox(height: AppSpacing.lg),
 
-              // 장소 선택 버튼
+              // Location Picker
               OutlinedButton.icon(
                 onPressed: _pickLocation,
                 icon: Icon(
@@ -243,30 +234,30 @@ class _GroupCreateScreenState extends ConsumerState<GroupCreateScreen> {
                 ),
                 label: Text(
                   _selectedLocation != null
-                      ? '장소 선택됨 · 변경하기'
-                      : '지도에서 장소 선택',
+                      ? l10n.selectLocation
+                      : l10n.pickLocationOnMap,
                 ),
               ),
               const SizedBox(height: AppSpacing.sm),
 
-              // 장소 이름
+              // Location Name
               TextFormField(
                 controller: _locationNameController,
-                decoration: const InputDecoration(
-                  labelText: '장소 이름',
-                  hintText: '예: 공대 3호관 스터디룸',
+                decoration: InputDecoration(
+                  labelText: l10n.locationName,
+                  hintText: 'ex: Engineering Building',
                 ),
                 validator: (v) =>
-                    v == null || v.isEmpty ? '장소 이름을 입력해주세요' : null,
+                    v == null || v.isEmpty ? l10n.locationName : null,
               ),
               const SizedBox(height: AppSpacing.xxxl),
 
-              // 제출 버튼
+              // Submit Button
               ElevatedButton(
                 onPressed: _isLoading ? null : _submit,
                 child: _isLoading
                     ? const AppLoader(color: Colors.white)
-                    : Text(_isEditMode ? '수정하기' : '모임 만들기'),
+                    : Text(_isEditMode ? l10n.update : l10n.submit),
               ),
             ],
           ),
@@ -276,21 +267,22 @@ class _GroupCreateScreenState extends ConsumerState<GroupCreateScreen> {
   }
 }
 
-class _CategoryOption extends StatelessWidget {
-  final String label;
+class _CategoryOption extends ConsumerWidget {
+  final String categoryId;
   final bool isSelected;
   final VoidCallback onTap;
 
   const _CategoryOption({
-    required this.label,
+    required this.categoryId,
     required this.isSelected,
     required this.onTap,
   });
 
   @override
-  Widget build(BuildContext context) {
-    final color = categoryColor(label);
-    final icon = categoryIcon(label);
+  Widget build(BuildContext context, WidgetRef ref) {
+    final color = categoryColor(categoryId);
+    final icon = categoryIcon(categoryId);
+    final l10n = ref.watch(l10nProvider);
 
     return GestureDetector(
       onTap: onTap,
@@ -301,7 +293,9 @@ class _CategoryOption extends StatelessWidget {
           vertical: AppSpacing.sm,
         ),
         decoration: BoxDecoration(
-          color: isSelected ? color.withValues(alpha: 0.12) : AppColors.fill,
+          color: isSelected
+              ? color.withValues(alpha: 0.12)
+              : Theme.of(context).colorScheme.surfaceContainer,
           borderRadius: BorderRadius.circular(AppRadius.sm),
           border: Border.all(
             color: isSelected ? color : Colors.transparent,
@@ -314,16 +308,19 @@ class _CategoryOption extends StatelessWidget {
             Icon(
               icon,
               size: 16,
-              color: isSelected ? color : AppColors.textSubtle,
+              color: isSelected
+                  ? color
+                  : Theme.of(context).colorScheme.onSurfaceVariant,
             ),
             const SizedBox(width: AppSpacing.xs),
             Text(
-              label,
+              localizedCategory(categoryId, l10n),
               style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                    color: isSelected ? color : AppColors.text,
-                    fontWeight:
-                        isSelected ? FontWeight.w600 : FontWeight.w500,
-                  ),
+                color: isSelected
+                    ? color
+                    : Theme.of(context).colorScheme.onSurface,
+                fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+              ),
             ),
           ],
         ),
@@ -350,13 +347,16 @@ class _StepperButton extends StatelessWidget {
           minimumSize: const Size(40, 40),
           padding: EdgeInsets.zero,
           side: BorderSide(
-            color: isEnabled ? AppColors.border : AppColors.borderSubtle,
+            color: isEnabled
+                ? Theme.of(context).colorScheme.outline
+                : Theme.of(context).colorScheme.outlineVariant,
           ),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(AppRadius.sm),
           ),
-          foregroundColor:
-              isEnabled ? AppColors.textStrong : AppColors.textDisabled,
+          foregroundColor: isEnabled
+              ? Theme.of(context).colorScheme.onSurface
+              : Theme.of(context).colorScheme.onSurfaceVariant,
         ),
         child: Icon(icon, size: 18),
       ),
@@ -364,95 +364,117 @@ class _StepperButton extends StatelessWidget {
   }
 }
 
-class _LocationPickerSheet extends StatefulWidget {
+class _LocationPickerPage extends StatefulWidget {
   final NLatLng? initialLocation;
 
-  const _LocationPickerSheet({this.initialLocation});
+  const _LocationPickerPage({this.initialLocation});
 
   @override
-  State<_LocationPickerSheet> createState() => _LocationPickerSheetState();
+  State<_LocationPickerPage> createState() => _LocationPickerPageState();
 }
 
-class _LocationPickerSheetState extends State<_LocationPickerSheet> {
+class _LocationPickerPageState extends State<_LocationPickerPage> {
   NaverMapController? _mapController;
-  NLatLng? _selected;
-  static const _markerId = 'selected-location';
+  final ValueNotifier<NLatLng?> _selectedNotifier = ValueNotifier(null);
 
   @override
   void initState() {
     super.initState();
-    _selected = widget.initialLocation;
+    _selectedNotifier.value = widget.initialLocation;
   }
 
-  Future<void> _updateMarker(NLatLng latLng) async {
-    final controller = _mapController;
-    if (controller == null) return;
-    await controller.clearOverlays();
-    await controller.addOverlay(
-      NMarker(
-        id: _markerId,
-        position: latLng,
-        iconTintColor: AppColors.primary,
-      ),
-    );
+  @override
+  void dispose() {
+    _selectedNotifier.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final hasSelection = _selected != null;
-
-    return SizedBox(
-      height: MediaQuery.of(context).size.height * 0.7,
-      child: Column(
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Выберите место'),
+        leading: IconButton(
+          icon: const Icon(Icons.close_rounded),
+          onPressed: () => Navigator.pop(context),
+        ),
+        actions: [
+          ValueListenableBuilder<NLatLng?>(
+            valueListenable: _selectedNotifier,
+            builder: (context, selected, _) {
+              return TextButton(
+                onPressed: selected != null
+                    ? () => Navigator.pop(context, selected)
+                    : null,
+                child: const Text(
+                  'Готово',
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                ),
+              );
+            },
+          ),
+          const SizedBox(width: AppSpacing.sm),
+        ],
+      ),
+      body: Stack(
         children: [
-          Padding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: AppSpacing.xl,
-              vertical: AppSpacing.lg,
+          NaverMap(
+            options: NaverMapViewOptions(
+              initialCameraPosition: NCameraPosition(
+                target:
+                    widget.initialLocation ??
+                    const NLatLng(
+                      CampusConstants.latitude,
+                      CampusConstants.longitude,
+                    ),
+                zoom: 16,
+              ),
+              mapType: NMapType.basic,
+              locationButtonEnable: true,
+              logoClickEnable: false,
             ),
-            child: Row(
-              children: [
-                Text('장소 선택', style: theme.textTheme.titleMedium),
-                const SizedBox(width: AppSpacing.sm),
-                Text(
-                  hasSelection ? '· 선택됨' : '· 지도를 탭하세요',
-                  style: theme.textTheme.bodySmall,
+            onMapReady: (controller) => _mapController = controller,
+            onCameraIdle: () async {
+              if (_mapController != null) {
+                final pos = await _mapController!.getCameraPosition();
+                _selectedNotifier.value = pos.target;
+              }
+            },
+          ),
+          // Фиксированный прицел (всегда в центре)
+          const IgnorePointer(
+            child: Center(
+              child: Padding(
+                padding: EdgeInsets.only(bottom: 32),
+                child: Icon(
+                  Icons.location_pin,
+                  size: 48,
+                  color: AppColors.primary,
                 ),
-                const Spacer(),
-                TextButton(
-                  onPressed: hasSelection
-                      ? () => Navigator.pop(context, _selected)
-                      : null,
-                  child: const Text('완료'),
-                ),
-              ],
+              ),
             ),
           ),
-          Expanded(
-            child: NaverMap(
-              options: NaverMapViewOptions(
-                initialCameraPosition: NCameraPosition(
-                  target: _selected ??
-                      const NLatLng(
-                        CampusConstants.latitude,
-                        CampusConstants.longitude,
-                      ),
-                  zoom: 16,
+          // Подсказка снизу
+          Positioned(
+            bottom: 24,
+            left: 24,
+            right: 24,
+            child: IgnorePointer(
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppSpacing.lg,
+                  vertical: AppSpacing.md,
                 ),
-                mapType: NMapType.basic,
+                decoration: BoxDecoration(
+                  color: Colors.black.withValues(alpha: 0.7),
+                  borderRadius: BorderRadius.circular(AppRadius.xxl),
+                ),
+                child: const Text(
+                  'Передвиньте карту, чтобы выбрать место',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(color: Colors.white, fontSize: 13),
+                ),
               ),
-              onMapReady: (controller) {
-                _mapController = controller;
-                final initial = _selected;
-                if (initial != null) {
-                  _updateMarker(initial);
-                }
-              },
-              onMapTapped: (point, latLng) {
-                setState(() => _selected = latLng);
-                _updateMarker(latLng);
-              },
             ),
           ),
         ],

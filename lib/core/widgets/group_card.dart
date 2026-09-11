@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:pinple/core/localization/app_localizations.dart';
 import 'package:pinple/core/theme/app_theme.dart';
 import 'package:pinple/core/utils/category_helpers.dart';
 import 'package:pinple/core/utils/distance.dart';
 import 'package:pinple/core/widgets/app_widgets.dart';
 import 'package:pinple/features/map/domain/group_model.dart';
 
-class GroupCard extends StatelessWidget {
+class GroupCard extends ConsumerWidget {
   final GroupModel group;
   final double? distanceMeters;
   final VoidCallback? onTap;
@@ -18,8 +20,9 @@ class GroupCard extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
+    final l10n = ref.watch(l10nProvider);
     final color = categoryColor(group.category);
     final icon = categoryIcon(group.category);
 
@@ -50,7 +53,10 @@ class GroupCard extends StatelessWidget {
                   children: [
                     Row(
                       children: [
-                        CategoryChip(label: group.category, color: color),
+                        CategoryChip(
+                          label: localizedCategory(group.category, l10n),
+                          color: color,
+                        ),
                         const Spacer(),
                         if (distanceMeters != null)
                           Text(
