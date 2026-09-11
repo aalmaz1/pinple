@@ -1,60 +1,56 @@
-# Pinple
+# Pinple (핀플) - 공주대학교 천안캠퍼스 소모임 플랫폼
 
-공주대학교 천안캠퍼스 학생 전용 소모임 앱. 지도 위에서 주변 소모임을 찾고, 직접 모임을 만들고, 참여를 신청할 수 있습니다.
+**Pinple**은 공주대학교 천안캠퍼스 학생들을 위한 위치 기반 소모임 매칭 서비스입니다. 캠퍼스 맵을 중심으로 실시간으로 모임을 찾고, 생성하고, 참여할 수 있습니다.
 
-## 주요 기능
+## 🚀 주요 기능
 
-- **위치 인증**: 천안캠퍼스 반경 2km 이내에서만 앱 사용 가능
-- **이메일 인증**: `@smail.kongju.ac.kr` 도메인 이메일로만 가입 가능
-- **지도 기반 소모임 탐색**: 네이버 지도 위에 소모임 핀 표시, 리스트 뷰(거리순 정렬) 전환
-- **소모임 CRUD**: 지도에서 위치를 핀으로 지정해 소모임 생성/수정/삭제
-- **참여 신청**: 소모임 참여 신청 및 수락/거절
+- **실시간 지도 기반 서비스**: 네이버 지도 API를 활용하여 캠퍼스 내 모임 위치를 한눈에 파악.
+- **모임 관리**: 스터디, 운동, 맛집 탐방 등 카테고리별 모임 생성 및 참여 관리.
+- **다국어 지원**: 한국어, 영어, 러시아어의 3개 국어를 완벽하게 지원.
+- **다크 모드 지원**: 사용자 설정에 따른 라이트/다크 모드 테마 적용.
+- **사용자 프로필**: 닉네임 설정 및 프로필 사진 업로드/변경 기능 (Firebase Storage 연동).
+- **보안 및 인증**: Firebase Auth를 통한 이메일 인증 기반의 안전한 회원가입.
 
-## 기술 스택
+## 🛠 기술 스택
 
-| 영역 | 기술 |
-|---|---|
-| 프레임워크 | Flutter |
-| 상태 관리 | Riverpod |
-| 라우팅 | go_router |
-| 지도 | flutter_naver_map |
-| 위치 | geolocator, permission_handler |
-| 백엔드 | Firebase (Auth, Firestore) — Spark(무료) 플랜 |
-| 폰트 | google_fonts (Noto Sans KR) |
+- **Framework**: Flutter (Dart)
+- **State Management**: Flutter Riverpod
+- **Backend**: Firebase (Authentication, Firestore, Storage)
+- **Navigation**: GoRouter
+- **Maps**: Flutter Naver Map
+- **Local Storage**: SharedPreferences
 
-## 프로젝트 구조
+## 📦 최적화 및 빌드 (Optimization)
+
+본 프로젝트는 배포를 위해 다음과 같은 최적화가 적용되었습니다:
+- **APK 용량 최적화**: 디버그 모드(134MB) 대비 60% 이상 축소 (약 45MB).
+- **성능 최적화**: `RepaintBoundary`를 사용한 지도 렌더링 효율화 및 R8(Full Mode) 코드 난독화/압축 적용.
+- **리소스 관리**: 불필요한 아이콘 및 로그 제거를 통한 런타임 성능 향상.
+
+### 빌드 방법 (Release APK)
+
+가장 최적화된 APK를 생성하려면 터미널에서 다음 명령어를 실행하세요:
+
+```bash
+flutter build apk --release --split-per-abi --obfuscate --split-debug-info=build/app/outputs/symbols --android-skip-build-dependency-validation
+```
+
+## 📂 프로젝트 구조
 
 ```
 lib/
-├── app.dart                     # 앱 진입점(라우터/테마 설정)
-├── main.dart
-├── firebase_options.dart
-├── core/
-│   ├── constants/                # 앱/캠퍼스 상수
-│   ├── theme/                    # 디자인 시스템 (토스 스타일)
-│   ├── utils/                    # 거리 계산, 유효성 검사 등
-│   └── widgets/                  # 공용 위젯
-└── features/
-    ├── auth/                     # 로그인/회원가입/이메일 인증
-    ├── location_gate/            # 캠퍼스 반경 위치 게이트
-    ├── map/                      # 지도, 소모임 CRUD, 참여 신청
-    ├── profile/                  # 마이페이지
-    └── shell/                    # 드로어, 위치 게이트 셸(ShellRoute)
+├── core/               # 공통 테마, 상수, 로컬라이징, 위젯
+├── features/
+│   ├── auth/           # 로그인, 회원가입, 인증 로직
+│   ├── map/            # 지도 표시, 마커, 모임 생성 및 상세
+│   ├── profile/        # 내 정보, 프로필 수정
+│   ├── settings/       # 테마 및 언어 설정
+│   └── shell/          # 앱의 기본 레이아웃 및 내비게이션
+└── main.dart           # 앱 진입점 및 초기화
 ```
 
-Feature-first 구조로, 각 feature는 `data`(리포지토리) / `domain`(모델) / `presentation`(화면) / `providers`(Riverpod)로 구성됩니다.
+## 📝 라이선스
 
-## 시작하기
+이 프로젝트는 공주대학교 학생들을 위한 비상업적 목적으로 개발되었습니다.
 
-```bash
-flutter pub get
-flutter run
-```
-
-Firebase(Android `google-services.json`)와 네이버 지도 Client ID 설정이 필요합니다. 관련 값은 `.gitignore`에 포함되어 있어 각자 재발급/재생성해야 합니다.
-
-## 개발 환경
-
-- Flutter SDK `^3.11.4`
-- Firebase 프로젝트: 별도 등록 필요 (Auth, Firestore 사용, Spark 플랜 기준)
-- 네이버 클라우드 플랫폼(NCP) Maps Application 등록 필요
+---
