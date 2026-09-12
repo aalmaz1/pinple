@@ -3,6 +3,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:pinple/core/theme/app_theme.dart';
+import 'package:pinple/core/localization/app_localizations.dart';
 import 'package:pinple/features/auth/presentation/email_verify_screen.dart';
 import 'package:pinple/features/auth/presentation/login_screen.dart';
 import 'package:pinple/features/auth/presentation/signup_screen.dart';
@@ -85,9 +86,10 @@ class PinpleApp extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final router = ref.watch(routerProvider);
     final settings = ref.watch(settingsProvider);
+    final l10n = ref.watch(l10nProvider);
 
     return MaterialApp.router(
-      title: 'Pinple',
+      title: l10n.appTitle,
       debugShowCheckedModeBanner: false,
       theme: AppTheme.lightTheme,
       darkTheme: AppTheme.darkTheme,

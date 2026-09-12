@@ -8,31 +8,14 @@ import 'package:pinple/core/constants/campus_constants.dart';
 import 'package:pinple/core/localization/app_localizations.dart';
 import 'package:pinple/core/theme/app_theme.dart';
 import 'package:pinple/core/utils/category_helpers.dart';
+import 'package:pinple/core/utils/geo_helpers.dart';
 import 'package:pinple/core/widgets/app_widgets.dart';
 import 'package:pinple/features/auth/providers/auth_provider.dart';
 import 'package:pinple/features/map/domain/group_model.dart';
 import 'package:pinple/features/map/providers/group_provider.dart';
 import 'package:pinple/features/settings/providers/settings_provider.dart';
 
-// Professional Border Logic: Accounts for the diagonal DMZ line
-bool isStrictlySouthKorea(NLatLng? latLng) {
-  if (latLng == null) return false;
-  final lat = latLng.latitude;
-  final lng = latLng.longitude;
-
-  // Basic South Korea box
-  if (lat < 33.0 || lat > 38.6 || lng < 124.0 || lng > 132.0) return false;
-
-  // Specific North Korea blocks (Kaesong and Western DMZ area)
-  // If we are in the West (lng < 127.2), the border is lower (~37.85)
-  if (lng < 127.2 && lat > 37.85) return false;
-
-  // Mid area check
-  if (lng >= 127.2 && lng < 128.0 && lat > 38.3) return false;
-
-  return true;
-}
-
+// Final version of Comrade Dialog
 void showComradeDialog(BuildContext context, L10n l10n) {
   showDialog(
     context: context,

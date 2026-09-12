@@ -46,6 +46,18 @@ android {
             )
         }
     }
+
+    packaging {
+        jniLibs {
+            useLegacyPackaging = false
+        }
+        resources {
+            excludes += "/META-INF/{AL2.0,LGPL2.1}"
+            excludes += "**/LICENSE.txt"
+            excludes += "**/LICENSE"
+            excludes += "**/NOTICE"
+        }
+    }
 }
 
 flutter {

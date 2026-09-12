@@ -79,7 +79,11 @@ class AuthRepository {
 
   Future<String> uploadProfileImage(String uid, File imageFile) async {
     final ref = _storage.ref().child('profile_images').child('$uid.jpg');
-    await ref.putFile(imageFile);
+
+    // Add metadata for better handling
+    final metadata = SettableMetadata(contentType: 'image/jpeg');
+
+    await ref.putFile(imageFile, metadata);
     final url = await ref.getDownloadURL();
 
     await _firestore.collection('users').doc(uid).update({'photoUrl': url});

@@ -23,8 +23,6 @@ class L10n {
   String get myGroups => get('myGroups');
   String get createGroup => get('createGroup');
   String get editGroup => get('editGroup');
-  String get nickname => get('nickname');
-  String get email => get('email');
   String get themeSettings => get('themeSettings');
   String get languageSettings => get('languageSettings');
   String get distanceSortHint => get('distanceSortHint');
@@ -33,7 +31,9 @@ class L10n {
   String get infoLoadError => get('infoLoadError');
   String get noJoinedGroups => get('noJoinedGroups');
   String get joinHint => get('joinHint');
-  String get pickPhoto => get('pickPhoto');
+  String get createdBy => get('createdBy');
+  String get introduction => get('introduction');
+  String get optional => get('optional');
 
   // Group creation strings
   String get groupTitle => get('groupTitle');
@@ -142,8 +142,6 @@ const _ko = {
   'myGroups': '내 모임',
   'createGroup': '모임 만들기',
   'editGroup': '모임 수정',
-  'nickname': '닉네임',
-  'email': '이메일',
   'themeSettings': '테마 설정',
   'languageSettings': '언어 설정',
   'distanceSortHint': '가까운 순서로 보여드려요',
@@ -152,7 +150,9 @@ const _ko = {
   'infoLoadError': '정보를 불러올 수 없습니다',
   'noJoinedGroups': '참여 중인 모임이 없어요',
   'joinHint': '주변 모임 탭에서 마음에 드는 모임에 참여해보세요',
-  'pickPhoto': '사진 선택',
+  'createdBy': '만든 사람',
+  'introduction': '소개',
+  'optional': '선택',
   'groupTitle': '모임 이름',
   'groupDescription': '모임 설명',
   'locationName': '장소 이름',
@@ -233,8 +233,6 @@ const _en = {
   'myGroups': 'My Groups',
   'createGroup': 'Create Group',
   'editGroup': 'Edit Group',
-  'nickname': 'Nickname',
-  'email': 'Email',
   'themeSettings': 'Theme Settings',
   'languageSettings': 'Language Settings',
   'distanceSortHint': 'Showing by distance',
@@ -243,7 +241,9 @@ const _en = {
   'infoLoadError': 'Error loading info',
   'noJoinedGroups': 'No joined groups',
   'joinHint': 'Join a group near you from the list',
-  'pickPhoto': 'Pick Photo',
+  'createdBy': 'Created by',
+  'introduction': 'Introduction',
+  'optional': 'Optional',
   'groupTitle': 'Group Name',
   'groupDescription': 'Description',
   'locationName': 'Location Name',
@@ -326,8 +326,6 @@ const _ru = {
   'myGroups': 'Мои встречи',
   'createGroup': 'Создать встречу',
   'editGroup': 'Редактировать',
-  'nickname': 'Никнейм',
-  'email': 'Электронная почта',
   'themeSettings': 'Настройки темы',
   'languageSettings': 'Настройки языка',
   'distanceSortHint': 'Сначала ближайшие',
@@ -336,7 +334,9 @@ const _ru = {
   'infoLoadError': 'Ошибка загрузки профиля',
   'noJoinedGroups': 'Вы еще не вступили ни в одну компанию',
   'joinHint': 'Найдите интересную компанию поблизости',
-  'pickPhoto': 'Выбрать фото',
+  'createdBy': 'Создатель',
+  'introduction': 'Описание',
+  'optional': 'Необязательно',
   'groupTitle': 'Название встречи',
   'groupDescription': 'Описание',
   'locationName': 'Место встречи',

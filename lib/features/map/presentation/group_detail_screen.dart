@@ -100,7 +100,7 @@ class GroupDetailScreen extends ConsumerWidget {
                           ),
                           const SizedBox(width: AppSpacing.xs),
                           Text(
-                            '만든 사람: ${group.ownerNickname}',
+                            '${l10n.createdBy}: ${group.ownerNickname}',
                             style: Theme.of(context).textTheme.bodyMedium
                                 ?.copyWith(color: AppColors.textSubtle),
                           ),
@@ -138,7 +138,7 @@ class GroupDetailScreen extends ConsumerWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       SectionTitle(
-                        title: '소개',
+                        title: l10n.introduction,
                         padding: const EdgeInsets.only(
                           top: AppSpacing.lg,
                           bottom: AppSpacing.md,
@@ -350,7 +350,9 @@ class GroupDetailScreen extends ConsumerWidget {
         title: Text(l10n.joining),
         content: TextField(
           controller: messageController,
-          decoration: InputDecoration(hintText: '${l10n.submit} (선택)'),
+          decoration: InputDecoration(
+            hintText: '${l10n.submit} (${l10n.optional})',
+          ),
           maxLines: 2,
         ),
         actions: [

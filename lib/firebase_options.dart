@@ -23,7 +23,7 @@ class DefaultFirebaseOptions {
     appId: '1:543219105525:android:59e2b17ad506f76b904fbc',
     messagingSenderId: '543219105525',
     projectId: 'pinple-5e23e',
-    storageBucket: 'pinple-5e23e.firebasestorage.app',
+    storageBucket: 'pinple-5e23e.appspot.com',
   );
 
   // TODO: Firebase Console에서 가져온 실제 값으로 교체하세요

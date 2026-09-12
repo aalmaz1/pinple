@@ -66,12 +66,9 @@ class SectionTitle extends StatelessWidget {
       child: Row(
         children: [
           Expanded(
-            child: Text(
-              title,
-              style: Theme.of(context).textTheme.titleLarge,
-            ),
+            child: Text(title, style: Theme.of(context).textTheme.titleLarge),
           ),
-          ?trailing,
+          if (trailing != null) trailing!,
         ],
       ),
     );
@@ -160,11 +157,7 @@ class CategoryChip extends StatelessWidget {
   final String label;
   final Color color;
 
-  const CategoryChip({
-    super.key,
-    required this.label,
-    required this.color,
-  });
+  const CategoryChip({super.key, required this.label, required this.color});
 
   @override
   Widget build(BuildContext context) {

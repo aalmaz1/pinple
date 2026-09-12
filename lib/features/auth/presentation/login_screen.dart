@@ -85,7 +85,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       ),
                       const SizedBox(height: AppSpacing.xl),
                       Text(
-                        'Pinple',
+                        l10n.appTitle,
                         style: Theme.of(context).textTheme.displayLarge,
                       ),
                       const SizedBox(height: AppSpacing.sm),
