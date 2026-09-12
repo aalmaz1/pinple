@@ -77,14 +77,6 @@ class AppDrawer extends ConsumerWidget {
             const Divider(height: 1),
             const SizedBox(height: AppSpacing.sm),
             _DrawerItem(
-              icon: Icons.list_rounded,
-              label: l10n.groupList,
-              onTap: () {
-                Navigator.pop(context);
-                context.push('/list');
-              },
-            ),
-            _DrawerItem(
               icon: Icons.person_rounded,
               label: l10n.profile,
               onTap: () {

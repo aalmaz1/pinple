@@ -104,7 +104,7 @@ class GroupBottomSheet extends ConsumerWidget {
             width: double.infinity,
             child: ElevatedButton(
               onPressed: onDetailTap,
-              child: Text(l10n.language == 'ko' ? '자세히 보기' : 'Show Details'),
+              child: Text(l10n.showDetails),
             ),
           ),
         ],

@@ -39,15 +39,17 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           .uploadProfileImage(uid, File(image.path));
       ref.invalidate(userDataProvider(uid));
       if (mounted) {
+        final l10n = ref.read(l10nProvider);
         ScaffoldMessenger.of(
           context,
-        ).showSnackBar(const SnackBar(content: Text('프로필 사진이 업데이트되었습니다')));
+        ).showSnackBar(SnackBar(content: Text(l10n.profileUpdated)));
       }
     } catch (e) {
       if (mounted) {
+        final l10n = ref.read(l10nProvider);
         ScaffoldMessenger.of(
           context,
-        ).showSnackBar(SnackBar(content: Text('업로드 실패: $e')));
+        ).showSnackBar(SnackBar(content: Text('${l10n.uploadFailed}: $e')));
       }
     } finally {
       if (mounted) setState(() => _isUploading = false);

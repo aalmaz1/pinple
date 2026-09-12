@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:pinple/core/localization/app_localizations.dart';
 import 'package:pinple/core/theme/app_theme.dart';
 import 'package:pinple/core/utils/validators.dart';
 import 'package:pinple/core/widgets/app_widgets.dart';
@@ -35,7 +36,9 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
 
     setState(() => _isLoading = true);
     try {
-      await ref.read(authRepositoryProvider).signUp(
+      await ref
+          .read(authRepositoryProvider)
+          .signUp(
             email: _emailController.text.trim(),
             password: _passwordController.text,
             nickname: _nicknameController.text.trim(),
@@ -56,63 +59,63 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = ref.watch(l10nProvider);
+
     return Scaffold(
-      appBar: AppBar(title: const Text('회원가입')),
+      appBar: AppBar(title: Text(l10n.signupTitle)),
       body: SingleChildScrollView(
         child: Form(
           key: _formKey,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              const PageHeader(
-                title: '환영해요',
-                subtitle: '학교 이메일로 가입하면\n주변 모임을 바로 볼 수 있어요',
+              PageHeader(
+                title: l10n.signupWelcome,
+                subtitle: l10n.signupSubtitle,
               ),
               Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: AppSpacing.xl,
-                ),
+                padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xl),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     TextFormField(
                       controller: _emailController,
-                      decoration: const InputDecoration(
-                        labelText: '학교 이메일',
+                      decoration: InputDecoration(
+                        labelText: l10n.emailLabel,
                         hintText: 'example@smail.kongju.ac.kr',
                       ),
                       keyboardType: TextInputType.emailAddress,
-                      validator: validateEmail,
+                      validator: (v) => validateEmail(v, l10n),
                     ),
                     const SizedBox(height: AppSpacing.lg),
                     TextFormField(
                       controller: _nicknameController,
-                      decoration: const InputDecoration(
-                        labelText: '닉네임',
+                      decoration: InputDecoration(
+                        labelText: l10n.nicknameLabel,
                         hintText: '2~10자',
                       ),
-                      validator: validateNickname,
+                      validator: (v) => validateNickname(v, l10n),
                     ),
                     const SizedBox(height: AppSpacing.lg),
                     TextFormField(
                       controller: _passwordController,
-                      decoration: const InputDecoration(
-                        labelText: '비밀번호',
+                      decoration: InputDecoration(
+                        labelText: l10n.passwordLabel,
                         hintText: '6자 이상',
                       ),
                       obscureText: true,
-                      validator: validatePassword,
+                      validator: (v) => validatePassword(v, l10n),
                     ),
                     const SizedBox(height: AppSpacing.lg),
                     TextFormField(
                       controller: _confirmPasswordController,
-                      decoration: const InputDecoration(
-                        labelText: '비밀번호 확인',
+                      decoration: InputDecoration(
+                        labelText: l10n.confirmPasswordLabel,
                       ),
                       obscureText: true,
                       validator: (value) {
                         if (value != _passwordController.text) {
-                          return '비밀번호가 일치하지 않습니다';
+                          return l10n.passwordMismatch;
                         }
                         return null;
                       },
@@ -122,7 +125,7 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
                       onPressed: _isLoading ? null : _signUp,
                       child: _isLoading
                           ? const AppLoader(color: Colors.white)
-                          : const Text('회원가입'),
+                          : Text(l10n.signupTitle),
                     ),
                   ],
                 ),

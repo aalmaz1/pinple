@@ -25,7 +25,7 @@ class GroupDetailScreen extends ConsumerWidget {
       loading: () => const Scaffold(body: Center(child: AppLoader())),
       error: (e, _) => Scaffold(
         appBar: AppBar(title: Text(l10n.map)),
-        body: Center(child: Text('오류: $e')),
+        body: Center(child: Text('${l10n.error}: $e')),
       ),
       data: (group) {
         if (group == null) {

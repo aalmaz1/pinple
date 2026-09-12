@@ -9,6 +9,7 @@ import 'package:pinple/core/utils/category_helpers.dart';
 import 'package:pinple/features/map/domain/group_model.dart';
 import 'package:pinple/features/map/presentation/widgets/group_bottom_sheet.dart';
 import 'package:pinple/features/map/providers/group_provider.dart';
+import 'package:pinple/features/settings/providers/settings_provider.dart';
 import 'package:pinple/features/shell/presentation/app_drawer.dart';
 
 class MapScreen extends ConsumerStatefulWidget {
@@ -24,6 +25,11 @@ class _MapScreenState extends ConsumerState<MapScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = ref.watch(l10nProvider);
+    final settings = ref.watch(settingsProvider);
+    final isNightMode =
+        settings.themeMode == AppThemeMode.dark ||
+        (settings.themeMode == AppThemeMode.system &&
+            MediaQuery.platformBrightnessOf(context) == Brightness.dark);
 
     // Optimization: Listen only to data changes, not the whole state
     ref.listen(activeGroupsProvider, (previous, next) {
@@ -39,8 +45,8 @@ class _MapScreenState extends ConsumerState<MapScreen> {
         children: [
           RepaintBoundary(
             child: NaverMap(
-              options: const NaverMapViewOptions(
-                initialCameraPosition: NCameraPosition(
+              options: NaverMapViewOptions(
+                initialCameraPosition: const NCameraPosition(
                   target: NLatLng(
                     CampusConstants.latitude,
                     CampusConstants.longitude,
@@ -48,8 +54,19 @@ class _MapScreenState extends ConsumerState<MapScreen> {
                   zoom: 15.5,
                 ),
                 mapType: NMapType.basic,
+                nightModeEnable: isNightMode,
                 locationButtonEnable: true,
                 logoClickEnable: false,
+                extent: const NLatLngBounds(
+                  southWest: NLatLng(
+                    CampusConstants.minLat,
+                    CampusConstants.minLng,
+                  ),
+                  northEast: NLatLng(
+                    CampusConstants.maxLat,
+                    CampusConstants.maxLng,
+                  ),
+                ),
               ),
               onMapReady: (controller) {
                 _mapController = controller;

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:pinple/core/constants/campus_constants.dart';
+import 'package:pinple/core/localization/app_localizations.dart';
 import 'package:pinple/core/theme/app_theme.dart';
 import 'package:pinple/core/utils/validators.dart';
 import 'package:pinple/core/widgets/app_widgets.dart';
@@ -32,7 +33,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
     setState(() => _isLoading = true);
     try {
-      await ref.read(authRepositoryProvider).signIn(
+      await ref
+          .read(authRepositoryProvider)
+          .signIn(
             email: _emailController.text.trim(),
             password: _passwordController.text,
           );
@@ -49,6 +52,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = ref.watch(l10nProvider);
+
     return Scaffold(
       body: SafeArea(
         child: SingleChildScrollView(
@@ -85,11 +90,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       ),
                       const SizedBox(height: AppSpacing.sm),
                       Text(
-                        '${CampusConstants.name}\n학생들의 소모임 공간',
+                        '${CampusConstants.name}\n${l10n.loginSubtitle}',
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                              color: AppColors.text,
-                              height: 1.5,
-                            ),
+                          color: AppColors.text,
+                          height: 1.5,
+                        ),
                       ),
                     ],
                   ),
@@ -104,35 +109,35 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     children: [
                       TextFormField(
                         controller: _emailController,
-                        decoration: const InputDecoration(
-                          labelText: '학교 이메일',
+                        decoration: InputDecoration(
+                          labelText: l10n.emailLabel,
                           hintText: 'name@smail.kongju.ac.kr',
                         ),
                         keyboardType: TextInputType.emailAddress,
-                        validator: validateEmail,
+                        validator: (v) => validateEmail(v, l10n),
                       ),
                       const SizedBox(height: AppSpacing.md),
                       TextFormField(
                         controller: _passwordController,
-                        decoration: const InputDecoration(
-                          labelText: '비밀번호',
+                        decoration: InputDecoration(
+                          labelText: l10n.passwordLabel,
                         ),
                         obscureText: true,
-                        validator: validatePassword,
+                        validator: (v) => validatePassword(v, l10n),
                       ),
                       const SizedBox(height: AppSpacing.xxl),
                       ElevatedButton(
                         onPressed: _isLoading ? null : _login,
                         child: _isLoading
                             ? const AppLoader(color: Colors.white)
-                            : const Text('로그인'),
+                            : Text(l10n.loginButton),
                       ),
                       const SizedBox(height: AppSpacing.md),
                       TextButton(
                         onPressed: () => context.push('/signup'),
-                        child: const Text(
-                          '계정이 없으신가요? 회원가입',
-                          style: TextStyle(
+                        child: Text(
+                          l10n.noAccountLink,
+                          style: const TextStyle(
                             fontSize: 14,
                             fontWeight: FontWeight.w500,
                           ),

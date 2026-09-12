@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:pinple/core/localization/app_localizations.dart';
 import 'package:pinple/core/theme/app_theme.dart';
 import 'package:pinple/core/widgets/app_widgets.dart';
 import 'package:pinple/features/auth/providers/auth_provider.dart';
@@ -18,15 +19,17 @@ class _EmailVerifyScreenState extends ConsumerState<EmailVerifyScreen> {
 
   Future<void> _checkVerification() async {
     setState(() => _isChecking = true);
+    final l10n = ref.read(l10nProvider);
     try {
-      final verified =
-          await ref.read(authRepositoryProvider).checkEmailVerified();
+      final verified = await ref
+          .read(authRepositoryProvider)
+          .checkEmailVerified();
       if (verified && mounted) {
         context.go('/map');
       } else if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('아직 인증이 완료되지 않았습니다')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(l10n.notVerifiedError)));
       }
     } finally {
       if (mounted) setState(() => _isChecking = false);
@@ -35,12 +38,13 @@ class _EmailVerifyScreenState extends ConsumerState<EmailVerifyScreen> {
 
   Future<void> _resendEmail() async {
     setState(() => _isResending = true);
+    final l10n = ref.read(l10nProvider);
     try {
       await ref.read(authRepositoryProvider).resendVerificationEmail();
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('인증 메일을 다시 보냈습니다')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(l10n.resentSuccess)));
       }
     } finally {
       if (mounted) setState(() => _isResending = false);
@@ -49,6 +53,8 @@ class _EmailVerifyScreenState extends ConsumerState<EmailVerifyScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = ref.watch(l10nProvider);
+
     return Scaffold(
       body: SafeArea(
         child: Column(
@@ -64,16 +70,16 @@ class _EmailVerifyScreenState extends ConsumerState<EmailVerifyScreen> {
             ),
             const SizedBox(height: AppSpacing.xl),
             Text(
-              '이메일을 확인해주세요',
+              l10n.verifyEmailTitle,
               style: Theme.of(context).textTheme.headlineSmall,
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: AppSpacing.md),
             Text(
-              '학교 이메일로 인증 메일을 보냈습니다.\n메일함을 확인해주세요.',
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: AppColors.textSubtle,
-                  ),
+              l10n.verifyEmailSubtitle,
+              style: Theme.of(
+                context,
+              ).textTheme.bodyMedium?.copyWith(color: AppColors.textSubtle),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: AppSpacing.xxxl),
@@ -86,12 +92,12 @@ class _EmailVerifyScreenState extends ConsumerState<EmailVerifyScreen> {
                     onPressed: _isChecking ? null : _checkVerification,
                     child: _isChecking
                         ? const AppLoader(color: Colors.white)
-                        : const Text('인증 완료 확인'),
+                        : Text(l10n.checkVerifyButton),
                   ),
                   const SizedBox(height: AppSpacing.md),
                   TextButton(
                     onPressed: _isResending ? null : _resendEmail,
-                    child: const Text('인증 메일 다시 보내기'),
+                    child: Text(l10n.resendEmailButton),
                   ),
                   const SizedBox(height: AppSpacing.sm),
                   TextButton(
@@ -102,7 +108,7 @@ class _EmailVerifyScreenState extends ConsumerState<EmailVerifyScreen> {
                     style: TextButton.styleFrom(
                       foregroundColor: AppColors.textSubtle,
                     ),
-                    child: const Text('다른 계정으로 로그인'),
+                    child: Text(l10n.loginOtherAccount),
                   ),
                 ],
               ),

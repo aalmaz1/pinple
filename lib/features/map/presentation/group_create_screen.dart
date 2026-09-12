@@ -12,6 +12,7 @@ import 'package:pinple/core/widgets/app_widgets.dart';
 import 'package:pinple/features/auth/providers/auth_provider.dart';
 import 'package:pinple/features/map/domain/group_model.dart';
 import 'package:pinple/features/map/providers/group_provider.dart';
+import 'package:pinple/features/settings/providers/settings_provider.dart';
 
 class GroupCreateScreen extends ConsumerStatefulWidget {
   final String? groupId; // null for create, non-null for edit
@@ -66,6 +67,29 @@ class _GroupCreateScreenState extends ConsumerState<GroupCreateScreen> {
     super.dispose();
   }
 
+  void _showComradeDialog(BuildContext context, L10n l10n) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (ctx) => AlertDialog(
+        title: const Text('🇰🇷'),
+        content: Text(
+          l10n.outOfBoundsError,
+          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+          textAlign: TextAlign.center,
+        ),
+        actions: [
+          Center(
+            child: ElevatedButton(
+              onPressed: () => Navigator.pop(ctx),
+              child: const Text('대한민국으로 돌아가기'),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
     if (_selectedLocation == null) {
@@ -73,6 +97,18 @@ class _GroupCreateScreenState extends ConsumerState<GroupCreateScreen> {
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(SnackBar(content: Text(l10n.selectLocation)));
+      return;
+    }
+
+    final l10n = ref.read(l10nProvider);
+    // Fail-safe: Check if location is within South Korea bounds
+    final lat = _selectedLocation!.latitude;
+    final lng = _selectedLocation!.longitude;
+    if (lat < CampusConstants.minLat ||
+        lat > CampusConstants.maxLat ||
+        lng < CampusConstants.minLng ||
+        lng > CampusConstants.maxLng) {
+      _showComradeDialog(context, l10n);
       return;
     }
 
@@ -115,9 +151,10 @@ class _GroupCreateScreenState extends ConsumerState<GroupCreateScreen> {
       if (mounted) context.pop();
     } catch (e) {
       if (mounted) {
+        final l10n = ref.read(l10nProvider);
         ScaffoldMessenger.of(
           context,
-        ).showSnackBar(SnackBar(content: Text('Error: $e')));
+        ).showSnackBar(SnackBar(content: Text('${l10n.error}: $e')));
       }
     } finally {
       if (mounted) setState(() => _isLoading = false);
@@ -364,16 +401,17 @@ class _StepperButton extends StatelessWidget {
   }
 }
 
-class _LocationPickerPage extends StatefulWidget {
+class _LocationPickerPage extends ConsumerStatefulWidget {
   final NLatLng? initialLocation;
 
   const _LocationPickerPage({this.initialLocation});
 
   @override
-  State<_LocationPickerPage> createState() => _LocationPickerPageState();
+  ConsumerState<_LocationPickerPage> createState() =>
+      _LocationPickerPageState();
 }
 
-class _LocationPickerPageState extends State<_LocationPickerPage> {
+class _LocationPickerPageState extends ConsumerState<_LocationPickerPage> {
   NaverMapController? _mapController;
   final ValueNotifier<NLatLng?> _selectedNotifier = ValueNotifier(null);
 
@@ -391,9 +429,16 @@ class _LocationPickerPageState extends State<_LocationPickerPage> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = ref.watch(l10nProvider);
+    final settings = ref.watch(settingsProvider);
+    final isNightMode =
+        settings.themeMode == AppThemeMode.dark ||
+        (settings.themeMode == AppThemeMode.system &&
+            MediaQuery.platformBrightnessOf(context) == Brightness.dark);
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Выберите место'),
+        title: Text(l10n.selectLocationTitle),
         leading: IconButton(
           icon: const Icon(Icons.close_rounded),
           onPressed: () => Navigator.pop(context),
@@ -402,13 +447,24 @@ class _LocationPickerPageState extends State<_LocationPickerPage> {
           ValueListenableBuilder<NLatLng?>(
             valueListenable: _selectedNotifier,
             builder: (context, selected, _) {
+              final isValid =
+                  selected != null &&
+                  selected.latitude >= CampusConstants.minLat &&
+                  selected.latitude <= CampusConstants.maxLat &&
+                  selected.longitude >= CampusConstants.minLng &&
+                  selected.longitude <= CampusConstants.maxLng;
+
               return TextButton(
-                onPressed: selected != null
+                onPressed: isValid
                     ? () => Navigator.pop(context, selected)
                     : null,
-                child: const Text(
-                  'Готово',
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                child: Text(
+                  l10n.done,
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                    color: isValid ? AppColors.primary : Colors.grey,
+                  ),
                 ),
               );
             },
@@ -430,8 +486,19 @@ class _LocationPickerPageState extends State<_LocationPickerPage> {
                 zoom: 16,
               ),
               mapType: NMapType.basic,
+              nightModeEnable: isNightMode,
               locationButtonEnable: true,
               logoClickEnable: false,
+              extent: const NLatLngBounds(
+                southWest: NLatLng(
+                  CampusConstants.minLat,
+                  CampusConstants.minLng,
+                ),
+                northEast: NLatLng(
+                  CampusConstants.maxLat,
+                  CampusConstants.maxLng,
+                ),
+              ),
             ),
             onMapReady: (controller) => _mapController = controller,
             onCameraIdle: () async {
@@ -469,10 +536,10 @@ class _LocationPickerPageState extends State<_LocationPickerPage> {
                   color: Colors.black.withValues(alpha: 0.7),
                   borderRadius: BorderRadius.circular(AppRadius.xxl),
                 ),
-                child: const Text(
-                  'Передвиньте карту, чтобы выбрать место',
+                child: Text(
+                  l10n.dragMapHint,
                   textAlign: TextAlign.center,
-                  style: TextStyle(color: Colors.white, fontSize: 13),
+                  style: const TextStyle(color: Colors.white, fontSize: 13),
                 ),
               ),
             ),
