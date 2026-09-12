@@ -14,8 +14,61 @@ import 'package:pinple/features/map/domain/group_model.dart';
 import 'package:pinple/features/map/providers/group_provider.dart';
 import 'package:pinple/features/settings/providers/settings_provider.dart';
 
+// Professional Border Logic: Accounts for the diagonal DMZ line
+bool isStrictlySouthKorea(NLatLng? latLng) {
+  if (latLng == null) return false;
+  final lat = latLng.latitude;
+  final lng = latLng.longitude;
+
+  // Basic South Korea box
+  if (lat < 33.0 || lat > 38.6 || lng < 124.0 || lng > 132.0) return false;
+
+  // Specific North Korea blocks (Kaesong and Western DMZ area)
+  // If we are in the West (lng < 127.2), the border is lower (~37.85)
+  if (lng < 127.2 && lat > 37.85) return false;
+
+  // Mid area check
+  if (lng >= 127.2 && lng < 128.0 && lat > 38.3) return false;
+
+  return true;
+}
+
+void showComradeDialog(BuildContext context, L10n l10n) {
+  showDialog(
+    context: context,
+    barrierDismissible: false,
+    builder: (ctx) => AlertDialog(
+      title: const Text('🇰🇷'),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Text('⚠️', style: TextStyle(fontSize: 48)),
+          const SizedBox(height: AppSpacing.md),
+          Text(
+            l10n.outOfBoundsError,
+            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+            textAlign: TextAlign.center,
+          ),
+        ],
+      ),
+      actions: [
+        Center(
+          child: ElevatedButton(
+            onPressed: () => Navigator.pop(ctx),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.primary,
+              foregroundColor: Colors.white,
+            ),
+            child: const Text('대한민국으로 돌아가기'),
+          ),
+        ),
+      ],
+    ),
+  );
+}
+
 class GroupCreateScreen extends ConsumerStatefulWidget {
-  final String? groupId; // null for create, non-null for edit
+  final String? groupId;
 
   const GroupCreateScreen({super.key, this.groupId});
 
@@ -67,53 +120,22 @@ class _GroupCreateScreenState extends ConsumerState<GroupCreateScreen> {
     super.dispose();
   }
 
-  void _showComradeDialog(BuildContext context, L10n l10n) {
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (ctx) => AlertDialog(
-        title: const Text('🇰🇷'),
-        content: Text(
-          l10n.outOfBoundsError,
-          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
-          textAlign: TextAlign.center,
-        ),
-        actions: [
-          Center(
-            child: ElevatedButton(
-              onPressed: () => Navigator.pop(ctx),
-              child: const Text('대한민국으로 돌아가기'),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
     if (_selectedLocation == null) {
-      final l10n = ref.read(l10nProvider);
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(l10n.selectLocation)));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(ref.read(l10nProvider).selectLocation)),
+      );
       return;
     }
 
     final l10n = ref.read(l10nProvider);
-    // Fail-safe: Check if location is within South Korea bounds
-    final lat = _selectedLocation!.latitude;
-    final lng = _selectedLocation!.longitude;
-    if (lat < CampusConstants.minLat ||
-        lat > CampusConstants.maxLat ||
-        lng < CampusConstants.minLng ||
-        lng > CampusConstants.maxLng) {
-      _showComradeDialog(context, l10n);
+    if (!isStrictlySouthKorea(_selectedLocation)) {
+      showComradeDialog(context, l10n);
       return;
     }
 
     setState(() => _isLoading = true);
-
     try {
       final user = FirebaseAuth.instance.currentUser!;
       final userData = await ref
@@ -147,11 +169,9 @@ class _GroupCreateScreenState extends ConsumerState<GroupCreateScreen> {
         );
         await ref.read(groupRepositoryProvider).createGroup(group);
       }
-
       if (mounted) context.pop();
     } catch (e) {
       if (mounted) {
-        final l10n = ref.read(l10nProvider);
         ScaffoldMessenger.of(
           context,
         ).showSnackBar(SnackBar(content: Text('${l10n.error}: $e')));
@@ -176,8 +196,8 @@ class _GroupCreateScreenState extends ConsumerState<GroupCreateScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     final l10n = ref.watch(l10nProvider);
+    final theme = Theme.of(context);
 
     return Scaffold(
       appBar: AppBar(
@@ -190,7 +210,6 @@ class _GroupCreateScreenState extends ConsumerState<GroupCreateScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              // Group Name
               TextFormField(
                 controller: _titleController,
                 decoration: InputDecoration(
@@ -201,8 +220,6 @@ class _GroupCreateScreenState extends ConsumerState<GroupCreateScreen> {
                     v == null || v.isEmpty ? l10n.groupTitle : null,
               ),
               const SizedBox(height: AppSpacing.lg),
-
-              // Category
               Text(l10n.category, style: theme.textTheme.labelLarge),
               const SizedBox(height: AppSpacing.sm),
               Wrap(
@@ -217,8 +234,6 @@ class _GroupCreateScreenState extends ConsumerState<GroupCreateScreen> {
                 }).toList(),
               ),
               const SizedBox(height: AppSpacing.lg),
-
-              // Max Members
               Text(l10n.maxMembers, style: theme.textTheme.labelLarge),
               const SizedBox(height: AppSpacing.sm),
               Row(
@@ -247,8 +262,6 @@ class _GroupCreateScreenState extends ConsumerState<GroupCreateScreen> {
                 ],
               ),
               const SizedBox(height: AppSpacing.lg),
-
-              // Description
               TextFormField(
                 controller: _descriptionController,
                 decoration: InputDecoration(
@@ -260,8 +273,6 @@ class _GroupCreateScreenState extends ConsumerState<GroupCreateScreen> {
                     v == null || v.isEmpty ? l10n.groupDescription : null,
               ),
               const SizedBox(height: AppSpacing.lg),
-
-              // Location Picker
               OutlinedButton.icon(
                 onPressed: _pickLocation,
                 icon: Icon(
@@ -276,8 +287,6 @@ class _GroupCreateScreenState extends ConsumerState<GroupCreateScreen> {
                 ),
               ),
               const SizedBox(height: AppSpacing.sm),
-
-              // Location Name
               TextFormField(
                 controller: _locationNameController,
                 decoration: InputDecoration(
@@ -288,8 +297,6 @@ class _GroupCreateScreenState extends ConsumerState<GroupCreateScreen> {
                     v == null || v.isEmpty ? l10n.locationName : null,
               ),
               const SizedBox(height: AppSpacing.xxxl),
-
-              // Submit Button
               ElevatedButton(
                 onPressed: _isLoading ? null : _submit,
                 child: _isLoading
@@ -369,7 +376,6 @@ class _CategoryOption extends ConsumerWidget {
 class _StepperButton extends StatelessWidget {
   final IconData icon;
   final VoidCallback? onPressed;
-
   const _StepperButton({required this.icon, this.onPressed});
 
   @override
@@ -403,7 +409,6 @@ class _StepperButton extends StatelessWidget {
 
 class _LocationPickerPage extends ConsumerStatefulWidget {
   final NLatLng? initialLocation;
-
   const _LocationPickerPage({this.initialLocation});
 
   @override
@@ -447,23 +452,25 @@ class _LocationPickerPageState extends ConsumerState<_LocationPickerPage> {
           ValueListenableBuilder<NLatLng?>(
             valueListenable: _selectedNotifier,
             builder: (context, selected, _) {
-              final isValid =
-                  selected != null &&
-                  selected.latitude >= CampusConstants.minLat &&
-                  selected.latitude <= CampusConstants.maxLat &&
-                  selected.longitude >= CampusConstants.minLng &&
-                  selected.longitude <= CampusConstants.maxLng;
-
+              final isValid = isStrictlySouthKorea(selected);
               return TextButton(
-                onPressed: isValid
-                    ? () => Navigator.pop(context, selected)
+                onPressed: selected != null
+                    ? () {
+                        if (isValid) {
+                          Navigator.pop(context, selected);
+                        } else {
+                          showComradeDialog(context, l10n);
+                        }
+                      }
                     : null,
                 child: Text(
                   l10n.done,
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
                     fontSize: 16,
-                    color: isValid ? AppColors.primary : Colors.grey,
+                    color: selected != null
+                        ? (isValid ? AppColors.primary : Colors.red)
+                        : Colors.grey,
                   ),
                 ),
               );
@@ -490,14 +497,11 @@ class _LocationPickerPageState extends ConsumerState<_LocationPickerPage> {
               locationButtonEnable: true,
               logoClickEnable: false,
               extent: const NLatLngBounds(
-                southWest: NLatLng(
-                  CampusConstants.minLat,
-                  CampusConstants.minLng,
-                ),
+                southWest: NLatLng(33.0, 124.0),
                 northEast: NLatLng(
-                  CampusConstants.maxLat,
-                  CampusConstants.maxLng,
-                ),
+                  39.0,
+                  132.0,
+                ), // Allow seeing North to trigger warning
               ),
             ),
             onMapReady: (controller) => _mapController = controller,
@@ -508,39 +512,56 @@ class _LocationPickerPageState extends ConsumerState<_LocationPickerPage> {
               }
             },
           ),
-          // Фиксированный прицел (всегда в центре)
-          const IgnorePointer(
+          IgnorePointer(
             child: Center(
               child: Padding(
-                padding: EdgeInsets.only(bottom: 32),
-                child: Icon(
-                  Icons.location_pin,
-                  size: 48,
-                  color: AppColors.primary,
+                padding: const EdgeInsets.only(bottom: 32),
+                child: ValueListenableBuilder<NLatLng?>(
+                  valueListenable: _selectedNotifier,
+                  builder: (context, pos, _) {
+                    final isValid = isStrictlySouthKorea(pos);
+                    return Icon(
+                      Icons.location_pin,
+                      size: 54,
+                      color: isValid ? AppColors.primary : Colors.red,
+                    );
+                  },
                 ),
               ),
             ),
           ),
-          // Подсказка снизу
           Positioned(
             bottom: 24,
             left: 24,
             right: 24,
             child: IgnorePointer(
-              child: Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: AppSpacing.lg,
-                  vertical: AppSpacing.md,
-                ),
-                decoration: BoxDecoration(
-                  color: Colors.black.withValues(alpha: 0.7),
-                  borderRadius: BorderRadius.circular(AppRadius.xxl),
-                ),
-                child: Text(
-                  l10n.dragMapHint,
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(color: Colors.white, fontSize: 13),
-                ),
+              child: ValueListenableBuilder<NLatLng?>(
+                valueListenable: _selectedNotifier,
+                builder: (context, pos, _) {
+                  final isValid = isStrictlySouthKorea(pos);
+                  return AnimatedContainer(
+                    duration: const Duration(milliseconds: 200),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: AppSpacing.lg,
+                      vertical: AppSpacing.md,
+                    ),
+                    decoration: BoxDecoration(
+                      color: (isValid ? Colors.black : Colors.red).withValues(
+                        alpha: 0.8,
+                      ),
+                      borderRadius: BorderRadius.circular(AppRadius.xxl),
+                    ),
+                    child: Text(
+                      isValid ? l10n.dragMapHint : l10n.outOfBoundsError,
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 13,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  );
+                },
               ),
             ),
           ),

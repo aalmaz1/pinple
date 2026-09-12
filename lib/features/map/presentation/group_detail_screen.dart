@@ -451,7 +451,7 @@ class GroupDetailScreen extends ConsumerWidget {
             onPressed: () async {
               await ref.read(groupRepositoryProvider).deleteGroup(group.id);
               if (ctx.mounted) Navigator.pop(ctx);
-              if (context.mounted) context.pop();
+              if (context.mounted) context.go('/map');
             },
             child: Text(l10n.deleteGroup),
           ),
