@@ -438,27 +438,72 @@ class GroupDetailScreen extends ConsumerWidget {
     GroupModel group,
     L10n l10n,
   ) {
+    bool isDeleting = false;
+
     showDialog(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text(l10n.deleteConfirmTitle),
-        content: Text(l10n.deleteConfirmMessage),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: Text(l10n.cancel),
-          ),
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(backgroundColor: AppColors.error),
-            onPressed: () async {
-              await ref.read(groupRepositoryProvider).deleteGroup(group.id);
-              if (ctx.mounted) Navigator.pop(ctx);
-              if (context.mounted) context.go('/map');
-            },
-            child: Text(l10n.deleteGroup),
-          ),
-        ],
-      ),
+      barrierDismissible: false,
+      builder: (ctx) {
+        return StatefulBuilder(
+          builder: (context, setDialogState) {
+            return AlertDialog(
+              title: Text(l10n.deleteConfirmTitle),
+              content: Text(l10n.deleteConfirmMessage),
+              actions: [
+                TextButton(
+                  onPressed: isDeleting ? null : () => Navigator.pop(ctx),
+                  child: Text(l10n.cancel),
+                ),
+                SizedBox(
+                  width: 100,
+                  height: 40,
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.error,
+                      padding: EdgeInsets.zero,
+                    ),
+                    onPressed: isDeleting
+                        ? null
+                        : () async {
+                            setDialogState(() => isDeleting = true);
+                            try {
+                              // Perform deletion
+                              await ref
+                                  .read(groupRepositoryProvider)
+                                  .deleteGroup(group.id);
+
+                              // 1. Close dialog immediately
+                              if (ctx.mounted) Navigator.pop(ctx);
+
+                              // 2. Navigate to map BEFORE invalidating
+                              if (context.mounted) context.go('/map');
+
+                              // 3. Invalidate providers after a small delay to avoid Stream errors on the closed screen
+                              Future.delayed(
+                                const Duration(milliseconds: 100),
+                                () {
+                                  ref.invalidate(activeGroupsProvider);
+                                },
+                              );
+                            } catch (e) {
+                              if (context.mounted) {
+                                setDialogState(() => isDeleting = false);
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(content: Text('${l10n.error}: $e')),
+                                );
+                              }
+                            }
+                          },
+                    child: isDeleting
+                        ? const AppLoader(size: 20, color: Colors.white)
+                        : Text(l10n.deleteGroup),
+                  ),
+                ),
+              ],
+            );
+          },
+        );
+      },
     );
   }
 }

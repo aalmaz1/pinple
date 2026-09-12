@@ -479,13 +479,6 @@ class _LocationPickerPageState extends ConsumerState<_LocationPickerPage> {
               nightModeEnable: isNightMode,
               locationButtonEnable: true,
               logoClickEnable: false,
-              extent: const NLatLngBounds(
-                southWest: NLatLng(33.0, 124.0),
-                northEast: NLatLng(
-                  39.0,
-                  132.0,
-                ), // Allow seeing North to trigger warning
-              ),
             ),
             onMapReady: (controller) => _mapController = controller,
             onCameraIdle: () async {

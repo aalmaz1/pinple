@@ -35,14 +35,23 @@ class GroupRepository {
   }
 
   Future<void> deleteGroup(String groupId) async {
-    await _groupsRef.doc(groupId).delete();
-    // Also delete related join requests
+    final batch = _firestore.batch();
+
+    // 1. Get all related join requests
     final requests = await _requestsRef
         .where('groupId', isEqualTo: groupId)
         .get();
+
+    // 2. Add all requests to the batch deletion
     for (final doc in requests.docs) {
-      await doc.reference.delete();
+      batch.delete(doc.reference);
     }
+
+    // 3. Add the group itself to the batch
+    batch.delete(_groupsRef.doc(groupId));
+
+    // 4. Commit everything atomically
+    await batch.commit();
   }
 
   Future<void> sendJoinRequest(JoinRequestModel request) async {

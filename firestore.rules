@@ -18,12 +18,19 @@ service cloud.firestore {
     }
 
     function isMember() {
-      return isVerified() && isKongjuEmail();
+      return isSignedIn() && isKongjuEmail();
     }
 
     function isGroupOwner(groupId) {
       return isMember()
         && get(/databases/$(database)/documents/groups/$(groupId)).data.ownerId == request.auth.uid;
+    }
+
+    function isInsideSouthKorea(data) {
+      return data.latitude >= 33.0 && data.latitude <= 38.6
+          && data.longitude >= 124.0 && data.longitude <= 132.0
+          && (data.longitude < 127.2 ? data.latitude <= 37.85 : true)
+          && (data.longitude >= 127.2 && data.longitude < 128.0 ? data.latitude <= 38.3 : true);
     }
 
     // ── Users ──
@@ -56,11 +63,12 @@ service cloud.firestore {
                     && request.resource.data.title.size() > 0
                     && request.resource.data.maxMembers is int
                     && request.resource.data.maxMembers >= 2
-                    && request.resource.data.maxMembers <= 20;
+                    && request.resource.data.maxMembers <= 20
+                    && isInsideSouthKorea(request.resource.data);
 
       // Owner can update any field; non-owner can only add themselves or remove themselves from memberIds
       allow update: if isMember() && (
-        resource.data.ownerId == request.auth.uid ||
+        (resource.data.ownerId == request.auth.uid && isInsideSouthKorea(request.resource.data)) ||
         (
           request.resource.data.diff(resource.data).affectedKeys().hasOnly(['memberIds']) &&
           (

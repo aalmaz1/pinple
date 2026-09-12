@@ -4,7 +4,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:pinple/core/theme/app_theme.dart';
 import 'package:pinple/core/localization/app_localizations.dart';
-import 'package:pinple/features/auth/presentation/email_verify_screen.dart';
 import 'package:pinple/features/auth/presentation/login_screen.dart';
 import 'package:pinple/features/auth/presentation/signup_screen.dart';
 import 'package:pinple/features/auth/providers/auth_provider.dart';
@@ -25,7 +24,6 @@ final routerProvider = Provider<GoRouter>((ref) {
     redirect: (context, state) {
       final user = authState.value;
       final isLoggedIn = user != null;
-      final isEmailVerified = user?.emailVerified ?? false;
       final currentPath = state.matchedLocation;
 
       final authPaths = ['/login', '/signup'];
@@ -35,11 +33,7 @@ final routerProvider = Provider<GoRouter>((ref) {
         return isOnAuthPage ? null : '/login';
       }
 
-      if (!isEmailVerified) {
-        return currentPath == '/verify-email' ? null : '/verify-email';
-      }
-
-      if (isOnAuthPage || currentPath == '/verify-email') {
+      if (isOnAuthPage) {
         return '/map';
       }
 
@@ -48,10 +42,6 @@ final routerProvider = Provider<GoRouter>((ref) {
     routes: [
       GoRoute(path: '/login', builder: (_, _) => const LoginScreen()),
       GoRoute(path: '/signup', builder: (_, _) => const SignUpScreen()),
-      GoRoute(
-        path: '/verify-email',
-        builder: (_, _) => const EmailVerifyScreen(),
-      ),
       ShellRoute(
         builder: (_, _, child) => LocationGate(child: child),
         routes: [
@@ -86,10 +76,9 @@ class PinpleApp extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final router = ref.watch(routerProvider);
     final settings = ref.watch(settingsProvider);
-    final l10n = ref.watch(l10nProvider);
 
     return MaterialApp.router(
-      title: l10n.appTitle,
+      title: 'Pinple',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.lightTheme,
       darkTheme: AppTheme.darkTheme,

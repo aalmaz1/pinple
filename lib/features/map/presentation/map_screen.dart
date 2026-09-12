@@ -57,16 +57,6 @@ class _MapScreenState extends ConsumerState<MapScreen> {
                 nightModeEnable: isNightMode,
                 locationButtonEnable: true,
                 logoClickEnable: false,
-                extent: const NLatLngBounds(
-                  southWest: NLatLng(
-                    CampusConstants.minLat,
-                    CampusConstants.minLng,
-                  ),
-                  northEast: NLatLng(
-                    CampusConstants.maxLat,
-                    CampusConstants.maxLng,
-                  ),
-                ),
               ),
               onMapReady: (controller) {
                 _mapController = controller;

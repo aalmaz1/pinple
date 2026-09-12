@@ -36,7 +36,6 @@ class AuthRepository {
         'displayName': nickname,
         'createdAt': FieldValue.serverTimestamp(),
       });
-      await user.sendEmailVerification();
     } catch (e) {
       await user.delete();
       rethrow;
@@ -44,28 +43,7 @@ class AuthRepository {
   }
 
   Future<void> signIn({required String email, required String password}) async {
-    final credential = await _auth.signInWithEmailAndPassword(
-      email: email,
-      password: password,
-    );
-
-    await credential.user!.reload();
-    await credential.user!.getIdToken(true);
-
-    if (!_auth.currentUser!.emailVerified) {
-      await _auth.signOut();
-      throw Exception('이메일 인증을 완료해주세요');
-    }
-  }
-
-  Future<void> resendVerificationEmail() async {
-    await _auth.currentUser?.sendEmailVerification();
-  }
-
-  Future<bool> checkEmailVerified() async {
-    await _auth.currentUser?.reload();
-    await _auth.currentUser?.getIdToken(true);
-    return _auth.currentUser?.emailVerified ?? false;
+    await _auth.signInWithEmailAndPassword(email: email, password: password);
   }
 
   Future<void> signOut() async {
