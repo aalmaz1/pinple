@@ -229,7 +229,7 @@ class _GroupCreateScreenState extends ConsumerState<GroupCreateScreen> {
                   ),
                   Expanded(
                     child: Text(
-                      '$_maxMembers${l10n.language == 'ko' ? '명' : ''}',
+                      '$_maxMembers${l10n.memberSuffix}',
                       textAlign: TextAlign.center,
                       style: theme.textTheme.titleMedium?.copyWith(
                         fontWeight: FontWeight.w700,
@@ -452,7 +452,11 @@ class _LocationPickerPageState extends ConsumerState<_LocationPickerPage> {
                     fontWeight: FontWeight.bold,
                     fontSize: 16,
                     color: selected != null
-                        ? (isValid ? AppColors.primary : Colors.red)
+                        ? (isValid
+                              ? (isNightMode
+                                    ? AppColors.success
+                                    : AppColors.primary)
+                              : Colors.red)
                         : Colors.grey,
                   ),
                 ),
@@ -499,7 +503,11 @@ class _LocationPickerPageState extends ConsumerState<_LocationPickerPage> {
                     return Icon(
                       Icons.location_pin,
                       size: 54,
-                      color: isValid ? AppColors.primary : Colors.red,
+                      color: isValid
+                          ? (isNightMode
+                                ? AppColors.success
+                                : AppColors.primary)
+                          : Colors.red,
                     );
                   },
                 ),

@@ -52,7 +52,7 @@ class GroupBottomSheet extends ConsumerWidget {
                         ),
                         const SizedBox(width: AppSpacing.xs),
                         Text(
-                          '${group.memberIds.length}/${group.maxMembers}${l10n.language == 'ko' ? '명' : ''}',
+                          '${group.memberIds.length}/${group.maxMembers}${l10n.memberSuffix}',
                           style: theme.textTheme.labelMedium?.copyWith(
                             color: theme.colorScheme.onSurfaceVariant,
                           ),

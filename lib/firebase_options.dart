@@ -1,7 +1,3 @@
-// TODO: flutterfire configure 명령어로 이 파일을 자동 생성하세요
-// 아래는 빌드 에러 방지용 placeholder입니다.
-// 실행 방법: flutterfire configure
-
 import 'package:firebase_core/firebase_core.dart' show FirebaseOptions;
 import 'package:flutter/foundation.dart'
     show defaultTargetPlatform, TargetPlatform;
@@ -14,7 +10,7 @@ class DefaultFirebaseOptions {
       case TargetPlatform.iOS:
         return ios;
       default:
-        throw UnsupportedError('이 플랫폼은 지원하지 않습니다');
+        throw UnsupportedError('This platform is not supported');
     }
   }
 
@@ -25,8 +21,6 @@ class DefaultFirebaseOptions {
     projectId: 'pinple-5e23e',
     storageBucket: 'pinple-5e23e.appspot.com',
   );
-
-  // TODO: Firebase Console에서 가져온 실제 값으로 교체하세요
 
   static const FirebaseOptions ios = FirebaseOptions(
     apiKey: 'YOUR_IOS_API_KEY',

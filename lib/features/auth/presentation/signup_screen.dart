@@ -92,7 +92,7 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
                       controller: _nicknameController,
                       decoration: InputDecoration(
                         labelText: l10n.nicknameLabel,
-                        hintText: '2~10자',
+                        hintText: l10n.nicknameHint,
                       ),
                       validator: (v) => validateNickname(v, l10n),
                     ),
@@ -101,7 +101,7 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
                       controller: _passwordController,
                       decoration: InputDecoration(
                         labelText: l10n.passwordLabel,
-                        hintText: '6자 이상',
+                        hintText: l10n.passwordHint,
                       ),
                       obscureText: true,
                       validator: (v) => validatePassword(v, l10n),

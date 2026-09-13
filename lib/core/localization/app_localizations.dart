@@ -65,6 +65,8 @@ class L10n {
   String get nicknameLabel => get('nicknameLabel');
   String get confirmPasswordLabel => get('confirmPasswordLabel');
   String get passwordMismatch => get('passwordMismatch');
+  String get nicknameHint => get('nicknameHint');
+  String get passwordHint => get('passwordHint');
   String get verifyEmailTitle => get('verifyEmailTitle');
   String get verifyEmailSubtitle => get('verifyEmailSubtitle');
   String get checkVerifyButton => get('checkVerifyButton');
@@ -76,6 +78,7 @@ class L10n {
   String get uploadFailed => get('uploadFailed');
   String get error => get('error');
   String get showDetails => get('showDetails');
+  String get memberSuffix => get('memberSuffix');
 
   // Validators
   String get emailEmptyError => get('emailEmptyError');
@@ -178,6 +181,8 @@ const _ko = {
   'nicknameLabel': '닉네임',
   'confirmPasswordLabel': '비밀번호 확인',
   'passwordMismatch': '비밀번호가 일치하지 않습니다',
+  'nicknameHint': '2~10자',
+  'passwordHint': '6자 이상',
   'verifyEmailTitle': '이메일을 확인해주세요',
   'verifyEmailSubtitle': '학교 이메일로 인증 메일을 보냈습니다.\n메일함을 확인해주세요.',
   'checkVerifyButton': '인증 완료 확인',
@@ -189,6 +194,7 @@ const _ko = {
   'uploadFailed': '업로드 실패',
   'error': '오류',
   'showDetails': '자세히 보기',
+  'memberSuffix': '명',
   'emailEmptyError': '이메일을 입력해주세요',
   'emailDomainError': '공주대 이메일 형식만 사용 가능합니다',
   'passwordEmptyError': '비밀번호를 입력해주세요',
@@ -270,6 +276,8 @@ const _en = {
   'nicknameLabel': 'Nickname',
   'confirmPasswordLabel': 'Confirm Password',
   'passwordMismatch': 'Passwords do not match',
+  'nicknameHint': '2-10 chars',
+  'passwordHint': 'Min 6 chars',
   'verifyEmailTitle': 'Please verify your email',
   'verifyEmailSubtitle':
       'We sent a verification email to your school email.\nPlease check your inbox.',
@@ -282,6 +290,7 @@ const _en = {
   'uploadFailed': 'Upload failed',
   'error': 'Error',
   'showDetails': 'Show Details',
+  'memberSuffix': ' members',
   'emailEmptyError': 'Please enter email',
   'emailDomainError': 'Only Kongju email is allowed',
   'passwordEmptyError': 'Please enter password',
@@ -363,6 +372,8 @@ const _ru = {
   'nicknameLabel': 'Никнейм',
   'confirmPasswordLabel': 'Подтверждение пароля',
   'passwordMismatch': 'Пароли не совпадают',
+  'nicknameHint': 'от 2 до 10 симв.',
+  'passwordHint': 'мин. 6 симв.',
   'verifyEmailTitle': 'Подтвердите почту',
   'verifyEmailSubtitle':
       'Мы отправили письмо на вашу почту.\nПожалуйста, проверьте входящие.',
@@ -375,6 +386,7 @@ const _ru = {
   'uploadFailed': 'Ошибка загрузки',
   'error': 'Ошибка',
   'showDetails': 'Подробнее',
+  'memberSuffix': ' чел.',
   'emailEmptyError': 'Введите почту',
   'emailDomainError': 'Разрешена только почта вуза',
   'passwordEmptyError': 'Введите пароль',

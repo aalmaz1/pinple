@@ -2,9 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class AppColors {
-  static const primary = Color(0xFF3182F6);
-  static const primaryDark = Color(0xFF1B64DA);
-  static const primarySoft = Color(0xFFE8F2FE);
+  // Official KNU Colors
+  static const primary = Color(0xFF324EB3); // KNU Blue
+  static const primaryDark = Color(0xFF283D8F);
+  static const primarySoft = Color(0xFFEBEFF8);
 
   static const bg = Color(0xFFFFFFFF);
   static const bgSubtle = Color(0xFFF9FAFB);
@@ -20,11 +21,11 @@ class AppColors {
   static const borderSubtle = Color(0xFFF2F4F6);
 
   static const error = Color(0xFFF04452);
-  static const success = Color(0xFF00C854);
+  static const success = Color(0xFF009F41); // KNU Green
   static const warning = Color(0xFFFF9F1C);
 
-  static const categoryStudy = Color(0xFF3182F6);
-  static const categoryExercise = Color(0xFF00C854);
+  static const categoryStudy = Color(0xFF324EB3);
+  static const categoryExercise = Color(0xFF009F41);
   static const categoryMeal = Color(0xFFFF9F1C);
   static const categoryHobby = Color(0xFF8B5CF6);
   static const categoryOther = Color(0xFF8B95A1);

@@ -78,7 +78,7 @@ class GroupDetailScreen extends ConsumerWidget {
                           ),
                           const SizedBox(width: AppSpacing.xs),
                           Text(
-                            '${group.memberIds.length}/${group.maxMembers}명',
+                            '${group.memberIds.length}/${group.maxMembers}${l10n.memberSuffix}',
                             style: Theme.of(context).textTheme.labelMedium
                                 ?.copyWith(color: AppColors.textSubtle),
                           ),
