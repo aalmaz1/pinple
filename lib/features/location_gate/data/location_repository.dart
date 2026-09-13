@@ -20,9 +20,7 @@ class LocationRepository {
     }
 
     return Geolocator.getCurrentPosition(
-      locationSettings: const LocationSettings(
-        accuracy: LocationAccuracy.high,
-      ),
+      locationSettings: const LocationSettings(accuracy: LocationAccuracy.high),
     );
   }
 
@@ -34,10 +32,5 @@ class LocationRepository {
       CampusConstants.longitude,
     );
     return distance <= CampusConstants.radiusMeters;
-  }
-
-  Future<bool> isWithinCampus() async {
-    final position = await getCurrentPosition();
-    return isWithinCampusFor(position);
   }
 }

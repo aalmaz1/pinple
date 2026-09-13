@@ -22,15 +22,12 @@ class AppColors {
 
   static const error = Color(0xFFF04452);
   static const success = Color(0xFF009F41); // KNU Green
-  static const warning = Color(0xFFFF9F1C);
 
   static const categoryStudy = Color(0xFF324EB3);
   static const categoryExercise = Color(0xFF009F41);
   static const categoryMeal = Color(0xFFFF9F1C);
   static const categoryHobby = Color(0xFF8B5CF6);
   static const categoryOther = Color(0xFF8B95A1);
-  static const divider = Color(0xFFE5E8EB);
-  static const dividerDark = Color(0xFF333D4B);
 
   // Dark Colors
   static const bgDark = Color(0xFF191F28);
@@ -40,7 +37,6 @@ class AppColors {
 
   static const textStrongDark = Color(0xFFF9FAFB);
   static const textDark = Color(0xFFD1D6DB);
-  static const textSubtleDark = Color(0xFF8B95A1);
 
   static const borderDark = Color(0xFF333D4B);
   static const borderSubtleDark = Color(0xFF29323D);

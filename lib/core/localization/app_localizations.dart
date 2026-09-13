@@ -15,8 +15,6 @@ class L10n {
   String get map => get('map');
   String get groupList => get('groupList');
   String get logout => get('logout');
-  String get language => get('language');
-  String get theme => get('theme');
   String get light => get('light');
   String get dark => get('dark');
   String get system => get('system');
@@ -31,9 +29,6 @@ class L10n {
   String get infoLoadError => get('infoLoadError');
   String get noJoinedGroups => get('noJoinedGroups');
   String get joinHint => get('joinHint');
-  String get createdBy => get('createdBy');
-  String get introduction => get('introduction');
-  String get optional => get('optional');
 
   // Group creation strings
   String get groupTitle => get('groupTitle');
@@ -67,18 +62,15 @@ class L10n {
   String get passwordMismatch => get('passwordMismatch');
   String get nicknameHint => get('nicknameHint');
   String get passwordHint => get('passwordHint');
-  String get verifyEmailTitle => get('verifyEmailTitle');
-  String get verifyEmailSubtitle => get('verifyEmailSubtitle');
-  String get checkVerifyButton => get('checkVerifyButton');
-  String get resendEmailButton => get('resendEmailButton');
-  String get loginOtherAccount => get('loginOtherAccount');
-  String get notVerifiedError => get('notVerifiedError');
-  String get resentSuccess => get('resentSuccess');
   String get profileUpdated => get('profileUpdated');
   String get uploadFailed => get('uploadFailed');
   String get error => get('error');
   String get showDetails => get('showDetails');
   String get memberSuffix => get('memberSuffix');
+  String get createdBy => get('createdBy');
+  String get introduction => get('introduction');
+  String get optional => get('optional');
+  String get defaultUser => get('defaultUser');
 
   // Validators
   String get emailEmptyError => get('emailEmptyError');
@@ -93,6 +85,7 @@ class L10n {
   String get outOfBoundsError => get('outOfBoundsError');
   String get done => get('done');
   String get dragMapHint => get('dragMapHint');
+  String get backToKorea => get('backToKorea');
 
   // Location Blocked
   String get locationBlockedTitle => get('locationBlockedTitle');
@@ -101,7 +94,7 @@ class L10n {
   String get retry => get('retry');
   String get retryButton => get('retryButton');
 
-  // New actions
+  // Actions
   String get leaveGroup => get('leaveGroup');
   String get leaveConfirmTitle => get('leaveConfirmTitle');
   String get leaveConfirmMessage => get('leaveConfirmMessage');
@@ -137,8 +130,6 @@ const _ko = {
   'map': '지도',
   'groupList': '주변 모임',
   'logout': '로그아웃',
-  'language': '언어',
-  'theme': '테마',
   'light': '라이트',
   'dark': '다크',
   'system': '시스템',
@@ -153,9 +144,6 @@ const _ko = {
   'infoLoadError': '정보를 불러올 수 없습니다',
   'noJoinedGroups': '참여 중인 모임이 없어요',
   'joinHint': '주변 모임 탭에서 마음에 드는 모임에 참여해보세요',
-  'createdBy': '만든 사람',
-  'introduction': '소개',
-  'optional': '선택',
   'groupTitle': '모임 이름',
   'groupDescription': '모임 설명',
   'locationName': '장소 이름',
@@ -183,18 +171,15 @@ const _ko = {
   'passwordMismatch': '비밀번호가 일치하지 않습니다',
   'nicknameHint': '2~10자',
   'passwordHint': '6자 이상',
-  'verifyEmailTitle': '이메일을 확인해주세요',
-  'verifyEmailSubtitle': '학교 이메일로 인증 메일을 보냈습니다.\n메일함을 확인해주세요.',
-  'checkVerifyButton': '인증 완료 확인',
-  'resendEmailButton': '인증 메일 다시 보내기',
-  'loginOtherAccount': '다른 계정으로 로그인',
-  'notVerifiedError': '아직 인증이 완료되지 않았습니다',
-  'resentSuccess': '인증 메일을 다시 보냈습니다',
   'profileUpdated': '프로필 사진이 업데이트되었습니다',
   'uploadFailed': '업로드 실패',
   'error': '오류',
   'showDetails': '자세히 보기',
   'memberSuffix': '명',
+  'createdBy': '만든 사람',
+  'introduction': '소개',
+  'optional': '선택',
+  'defaultUser': '사용자',
   'emailEmptyError': '이메일을 입력해주세요',
   'emailDomainError': '공주대 이메일 형식만 사용 가능합니다',
   'passwordEmptyError': '비밀번호를 입력해주세요',
@@ -205,6 +190,7 @@ const _ko = {
   'outOfBoundsError': '어디 가너 동무?! 대한민국으로 돌아와야지!',
   'done': '완료',
   'dragMapHint': '지도를 움직여 장소를 선택해주세요',
+  'backToKorea': '대한민국으로 돌아가기',
   'locationBlockedTitle': '캠퍼스 근처에서만 사용할 수 있어요',
   'locationBlockedSubtitle': '캠퍼스 반경 내에서 이용해주세요',
   'locationErrorTitle': '위치를 확인할 수 없어요',
@@ -231,8 +217,6 @@ const _en = {
   'map': 'Map',
   'groupList': 'Nearby Groups',
   'logout': 'Logout',
-  'language': 'Language',
-  'theme': 'Theme',
   'light': 'Light',
   'dark': 'Dark',
   'system': 'System',
@@ -247,9 +231,6 @@ const _en = {
   'infoLoadError': 'Error loading info',
   'noJoinedGroups': 'No joined groups',
   'joinHint': 'Join a group near you from the list',
-  'createdBy': 'Created by',
-  'introduction': 'Introduction',
-  'optional': 'Optional',
   'groupTitle': 'Group Name',
   'groupDescription': 'Description',
   'locationName': 'Location Name',
@@ -278,19 +259,15 @@ const _en = {
   'passwordMismatch': 'Passwords do not match',
   'nicknameHint': '2-10 chars',
   'passwordHint': 'Min 6 chars',
-  'verifyEmailTitle': 'Please verify your email',
-  'verifyEmailSubtitle':
-      'We sent a verification email to your school email.\nPlease check your inbox.',
-  'checkVerifyButton': 'Check Verification',
-  'resendEmailButton': 'Resend Email',
-  'loginOtherAccount': 'Login with another account',
-  'notVerifiedError': 'Verification is not yet complete',
-  'resentSuccess': 'Verification email resent',
   'profileUpdated': 'Profile photo updated',
   'uploadFailed': 'Upload failed',
   'error': 'Error',
   'showDetails': 'Show Details',
   'memberSuffix': ' members',
+  'createdBy': 'Created by',
+  'introduction': 'Introduction',
+  'optional': 'Optional',
+  'defaultUser': 'User',
   'emailEmptyError': 'Please enter email',
   'emailDomainError': 'Only Kongju email is allowed',
   'passwordEmptyError': 'Please enter password',
@@ -298,9 +275,10 @@ const _en = {
   'nicknameEmptyError': 'Please enter nickname',
   'nicknameLengthError': 'Nickname must be 2-10 characters',
   'selectLocationTitle': 'Select Location',
-  'outOfBoundsError': 'Location must be within South Korea',
+  'outOfBoundsError': 'Where are you going, comrade?! Return to South Korea!',
   'done': 'Done',
   'dragMapHint': 'Drag the map to select a location',
+  'backToKorea': 'Return to South Korea',
   'locationBlockedTitle': 'Only available near campus',
   'locationBlockedSubtitle': 'Please use within the campus radius',
   'locationErrorTitle': 'Unable to verify location',
@@ -327,8 +305,6 @@ const _ru = {
   'map': 'Карта',
   'groupList': 'Список встреч',
   'logout': 'Выйти',
-  'language': 'Язык',
-  'theme': 'Тема',
   'light': 'Светлая',
   'dark': 'Темная',
   'system': 'Системная',
@@ -343,9 +319,6 @@ const _ru = {
   'infoLoadError': 'Ошибка загрузки профиля',
   'noJoinedGroups': 'Вы еще не вступили ни в одну компанию',
   'joinHint': 'Найдите интересную компанию поблизости',
-  'createdBy': 'Создатель',
-  'introduction': 'Описание',
-  'optional': 'Необязательно',
   'groupTitle': 'Название встречи',
   'groupDescription': 'Описание',
   'locationName': 'Место встречи',
@@ -374,19 +347,15 @@ const _ru = {
   'passwordMismatch': 'Пароли не совпадают',
   'nicknameHint': 'от 2 до 10 симв.',
   'passwordHint': 'мин. 6 симв.',
-  'verifyEmailTitle': 'Подтвердите почту',
-  'verifyEmailSubtitle':
-      'Мы отправили письмо на вашу почту.\nПожалуйста, проверьте входящие.',
-  'checkVerifyButton': 'Проверить подтверждение',
-  'resendEmailButton': 'Отправить письмо еще раз',
-  'loginOtherAccount': 'Войти в другой аккаунт',
-  'notVerifiedError': 'Подтверждение еще не завершено',
-  'resentSuccess': 'Письмо отправлено повторно',
   'profileUpdated': 'Фото профиля обновлено',
   'uploadFailed': 'Ошибка загрузки',
   'error': 'Ошибка',
   'showDetails': 'Подробнее',
   'memberSuffix': ' чел.',
+  'createdBy': 'Создатель',
+  'introduction': 'Описание',
+  'optional': 'Необязательно',
+  'defaultUser': 'Пользователь',
   'emailEmptyError': 'Введите почту',
   'emailDomainError': 'Разрешена только почта вуза',
   'passwordEmptyError': 'Введите пароль',
@@ -394,9 +363,11 @@ const _ru = {
   'nicknameEmptyError': 'Введите никнейм',
   'nicknameLengthError': 'Никнейм должен быть от 2 до 10 символов',
   'selectLocationTitle': 'Выберите место',
-  'outOfBoundsError': 'Место должно быть на территории Южной Кореи',
+  'outOfBoundsError':
+      'Куда это ты собрался, товарищ?! Возвращайся в Южную Корею!',
   'done': 'Готово',
   'dragMapHint': 'Передвиньте карту, чтобы выбрать место',
+  'backToKorea': 'Вернуться в Южную Корею',
   'locationBlockedTitle': 'Доступно только рядом с кампусом',
   'locationBlockedSubtitle':
       'Пожалуйста, используйте приложение в радиусе кампуса',

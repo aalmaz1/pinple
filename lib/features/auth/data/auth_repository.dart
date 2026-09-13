@@ -12,8 +12,6 @@ class AuthRepository {
 
   Stream<User?> get authStateChanges => _auth.userChanges();
 
-  User? get currentUser => _auth.currentUser;
-
   Future<void> signUp({
     required String email,
     required String password,

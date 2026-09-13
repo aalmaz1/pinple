@@ -42,7 +42,7 @@ void showComradeDialog(BuildContext context, L10n l10n) {
               backgroundColor: AppColors.primary,
               foregroundColor: Colors.white,
             ),
-            child: const Text('대한민국으로 돌아가기'),
+            child: Text(l10n.backToKorea),
           ),
         ),
       ],

@@ -7,8 +7,13 @@ class CampusConstants {
 
   // South Korea boundaries (Strictly South of North Korea)
   static const double minLat = 33.0;
-  static const double maxLat =
-      38.5; // Adjusted to include Northern Gangwon-do (Inje, etc.)
+  static const double maxLat = 38.6;
   static const double minLng = 124.0;
   static const double maxLng = 132.0;
+
+  // Specific DMZ cut-off points
+  static const double westLngLimit = 127.2;
+  static const double westLatLimit = 37.85;
+  static const double midLngLimit = 128.0;
+  static const double midLatLimit = 38.3;
 }

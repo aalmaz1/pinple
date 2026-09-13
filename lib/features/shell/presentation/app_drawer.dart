@@ -11,16 +11,16 @@ class AppDrawer extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = ref.watch(l10nProvider);
     final user = FirebaseAuth.instance.currentUser;
     final userDataAsync = user == null
         ? null
         : ref.watch(userDataProvider(user.uid));
 
     final displayName =
-        userDataAsync?.value?['displayName'] as String? ?? '사용자';
+        userDataAsync?.value?['displayName'] as String? ?? l10n.defaultUser;
     final photoUrl = userDataAsync?.value?['photoUrl'] as String?;
     final initial = displayName.isNotEmpty ? displayName[0] : '?';
-    final l10n = ref.watch(l10nProvider);
 
     return Drawer(
       backgroundColor: Theme.of(context).colorScheme.surface,

@@ -44,7 +44,7 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
             nickname: _nicknameController.text.trim(),
           );
       if (mounted) {
-        context.go('/verify-email');
+        context.go('/map');
       }
     } catch (e) {
       if (mounted) {
