@@ -1,0 +1,30 @@
+Copyright (c) 2026 Almaz Khudayberdiev. All rights reserved.
+
+This software and associated documentation files (the "Software") are
+proprietary and confidential.
+
+No license, express or implied, is granted to any person obtaining a copy
+of the Software. Without prior written permission from the copyright
+holder, you may NOT:
+
+  * copy, reproduce, or distribute the Software, in whole or in part;
+  * modify, adapt, translate, or create derivative works based on the
+    Software;
+  * publish, sublicense, sell, rent, lease, or lend the Software;
+  * reverse engineer or decompile the Software, except to the extent
+    such restriction is prohibited by applicable law.
+
+Unauthorized copying or use of this Software, via any medium, is strictly
+prohibited and may result in civil and criminal liability.
+
+For licensing inquiries, contact the copyright holder.
+
+----------------------------------------------------------------------------
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+
+NOTE: Third-party packages used by this project (see pubspec.yaml) are
+licensed separately under their own licenses (MIT, BSD, Apache-2.0, etc.).
+This notice applies only to the original source code of Pinple.

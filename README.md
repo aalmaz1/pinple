@@ -45,3 +45,12 @@ lib/
 │   ├── map/            # 지도 표시, 마커, 모임 생성/상세/위치 선택
 │   ├── profile/        # 내 정보, 프로필 수정
 │   ├── settings/       # 테마 및 언어 설정
+```
+
+## 라이선스 (License)
+
+Copyright (c) 2026 Almaz Khudayberdiev. **All rights reserved.**
+
+이 프로젝트는 독점(프로프라이어터리) 소프트웨어입니다. 저작권자의 사전 서면 허가 없이 코드의 복제, 수정, 배포, 재사용을 일체 금지합니다. 자세한 내용은 [LICENSE](LICENSE) 파일을 참조하세요.
+
+단, 본 프로젝트에서 사용하는 서드파티 패키지(`pubspec.yaml` 참조)는 각각의 오픈소스 라이선스(MIT, BSD, Apache-2.0 등)를 따릅니다.
