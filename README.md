@@ -45,3 +45,5 @@ lib/
 │   ├── map/            # 지도 표시, 마커, 모임 생성/상세/위치 선택
 │   ├── profile/        # 내 정보, 프로필 수정
 │   ├── settings/       # 테마 및 언어 설정
+
+Legal Notice: This project is NOT open-source. All rights are reserved by the author. You may view the code for educational purposes, but you are not permitted to copy, modify, fork, or redistribute it.
