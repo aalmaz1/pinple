@@ -18,16 +18,17 @@ class SettingsState {
   }
 }
 
-class SettingsNotifier extends StateNotifier<SettingsState> {
-  final SharedPreferences _prefs;
+class SettingsNotifier extends Notifier<SettingsState> {
+  SharedPreferences get _prefs => ref.read(sharedPreferencesProvider);
 
-  SettingsNotifier(this._prefs)
-    : super(
-        SettingsState(
-          themeMode: _loadThemeMode(_prefs),
-          locale: _loadLocale(_prefs),
-        ),
-      );
+  @override
+  SettingsState build() {
+    final prefs = ref.watch(sharedPreferencesProvider);
+    return SettingsState(
+      themeMode: _loadThemeMode(prefs),
+      locale: _loadLocale(prefs),
+    );
+  }
 
   static AppThemeMode _loadThemeMode(SharedPreferences prefs) {
     final theme = prefs.getString('themeMode') ?? 'system';
@@ -57,9 +58,6 @@ final sharedPreferencesProvider = Provider<SharedPreferences>((ref) {
   throw UnimplementedError();
 });
 
-final settingsProvider = StateNotifierProvider<SettingsNotifier, SettingsState>(
-  (ref) {
-    final prefs = ref.watch(sharedPreferencesProvider);
-    return SettingsNotifier(prefs);
-  },
+final settingsProvider = NotifierProvider<SettingsNotifier, SettingsState>(
+  SettingsNotifier.new,
 );

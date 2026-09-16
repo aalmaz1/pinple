@@ -8,6 +8,7 @@ import 'package:pinple/core/localization/app_localizations.dart';
 import 'package:pinple/core/theme/app_theme.dart';
 import 'package:pinple/core/widgets/app_widgets.dart';
 import 'package:pinple/core/widgets/group_card.dart';
+import 'package:pinple/core/widgets/skeleton.dart';
 import 'package:pinple/features/auth/providers/auth_provider.dart';
 import 'package:pinple/features/map/providers/group_provider.dart';
 
@@ -77,11 +78,10 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xl),
               child: userDataAsync.when(
-                loading: () => const Center(
-                  child: Padding(
-                    padding: EdgeInsets.symmetric(vertical: AppSpacing.xxxl),
-                    child: AppLoader(),
-                  ),
+                loading: () => const Skeleton(
+                  width: double.infinity,
+                  height: 100,
+                  borderRadius: AppRadius.lg,
                 ),
                 error: (e, _) => Text(
                   l10n.infoLoadError,
@@ -198,9 +198,21 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
 
             // My groups list
             myGroupsAsync.when(
-              loading: () => const Padding(
-                padding: EdgeInsets.symmetric(vertical: AppSpacing.xxxl),
-                child: Center(child: AppLoader()),
+              loading: () => Padding(
+                padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xl),
+                child: Column(
+                  children: List.generate(
+                    3,
+                    (i) => const Padding(
+                      padding: EdgeInsets.only(bottom: AppSpacing.md),
+                      child: Skeleton(
+                        width: double.infinity,
+                        height: 80,
+                        borderRadius: AppRadius.lg,
+                      ),
+                    ),
+                  ),
+                ),
               ),
               error: (e, _) => Padding(
                 padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xl),

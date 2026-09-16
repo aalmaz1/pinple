@@ -21,10 +21,10 @@ class AppColors {
   static const borderSubtle = Color(0xFFF2F4F6);
 
   static const error = Color(0xFFF04452);
-  static const success = Color(0xFF009F41); // KNU Green
+  static const success = Color(0xFF1CA546); // Official KNU Green
 
   static const categoryStudy = Color(0xFF324EB3);
-  static const categoryExercise = Color(0xFF009F41);
+  static const categoryExercise = Color(0xFF1CA546);
   static const categoryMeal = Color(0xFFFF9F1C);
   static const categoryHobby = Color(0xFF8B5CF6);
   static const categoryOther = Color(0xFF8B95A1);

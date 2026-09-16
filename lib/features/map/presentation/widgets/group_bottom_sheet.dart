@@ -23,8 +23,30 @@ class GroupBottomSheet extends ConsumerWidget {
     final color = categoryColor(group.category);
     final icon = categoryIcon(group.category);
 
-    return Padding(
-      padding: const EdgeInsets.all(AppSpacing.xl),
+    return Container(
+      margin: const EdgeInsets.fromLTRB(
+        AppSpacing.lg,
+        0,
+        AppSpacing.lg,
+        AppSpacing.xl,
+      ), // Floating effect
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surface,
+        borderRadius: BorderRadius.circular(
+          AppRadius.lg,
+        ), // Fully rounded corners
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.15),
+            blurRadius: 20,
+            offset: const Offset(0, 10),
+          ),
+        ],
+      ),
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.lg,
+        vertical: AppSpacing.md,
+      ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -65,6 +87,8 @@ class GroupBottomSheet extends ConsumerWidget {
                       style: theme.textTheme.titleLarge?.copyWith(
                         fontWeight: FontWeight.w700,
                       ),
+                      maxLines: 1, // Prevent height change with long titles
+                      overflow: TextOverflow.ellipsis,
                     ),
                   ],
                 ),
@@ -92,14 +116,7 @@ class GroupBottomSheet extends ConsumerWidget {
               ),
             ],
           ),
-          const SizedBox(height: AppSpacing.sm),
-          Text(
-            group.description,
-            style: theme.textTheme.bodyMedium,
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-          ),
-          const SizedBox(height: AppSpacing.xl),
+          const SizedBox(height: AppSpacing.md),
           SizedBox(
             width: double.infinity,
             child: ElevatedButton(

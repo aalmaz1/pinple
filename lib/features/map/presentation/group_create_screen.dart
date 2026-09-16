@@ -15,41 +15,6 @@ import 'package:pinple/features/map/domain/group_model.dart';
 import 'package:pinple/features/map/providers/group_provider.dart';
 import 'package:pinple/features/settings/providers/settings_provider.dart';
 
-// Final version of Comrade Dialog
-void showComradeDialog(BuildContext context, L10n l10n) {
-  showDialog(
-    context: context,
-    barrierDismissible: false,
-    builder: (ctx) => AlertDialog(
-      title: const Text('🇰🇷'),
-      content: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          const Text('⚠️', style: TextStyle(fontSize: 48)),
-          const SizedBox(height: AppSpacing.md),
-          Text(
-            l10n.outOfBoundsError,
-            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
-            textAlign: TextAlign.center,
-          ),
-        ],
-      ),
-      actions: [
-        Center(
-          child: ElevatedButton(
-            onPressed: () => Navigator.pop(ctx),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.primary,
-              foregroundColor: Colors.white,
-            ),
-            child: Text(l10n.backToKorea),
-          ),
-        ),
-      ],
-    ),
-  );
-}
-
 class GroupCreateScreen extends ConsumerStatefulWidget {
   final String? groupId;
 
@@ -452,11 +417,7 @@ class _LocationPickerPageState extends ConsumerState<_LocationPickerPage> {
                     fontWeight: FontWeight.bold,
                     fontSize: 16,
                     color: selected != null
-                        ? (isValid
-                              ? (isNightMode
-                                    ? AppColors.success
-                                    : AppColors.primary)
-                              : Colors.red)
+                        ? (isValid ? AppColors.success : Colors.red)
                         : Colors.grey,
                   ),
                 ),
@@ -503,11 +464,7 @@ class _LocationPickerPageState extends ConsumerState<_LocationPickerPage> {
                     return Icon(
                       Icons.location_pin,
                       size: 54,
-                      color: isValid
-                          ? (isNightMode
-                                ? AppColors.success
-                                : AppColors.primary)
-                          : Colors.red,
+                      color: isValid ? AppColors.success : Colors.red,
                     );
                   },
                 ),

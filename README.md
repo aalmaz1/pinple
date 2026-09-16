@@ -1,54 +1,39 @@
-# Pinple (핀플) - 공주대학교 천안캠퍼스 소모임 플랫폼
+# Pinple (Pin + People)
 
-**Pinple**은 공주대학교 천안캠퍼스 학생들을 위한 위치 기반 소모임 매칭 서비스입니다. 캠퍼스 맵을 중심으로 실시간으로 모임을 찾고, 생성하고, 참여할 수 있습니다.
+**Pinple**은 **국립공주대학교(KNU)** 학생들을 위해 개발된 전문가급 커뮤니티 애플리케이션입니다. 실시간 위치 정보와 고도의 지오펜싱 기술을 활용하여 캠퍼스 내에서 스터디, 운동, 맛집 탐방, 취미 활동 등 다양한 소모임을 쉽고 빠르게 조직하고 참여할 수 있도록 돕습니다.
 
-## 🚀 주요 기능
+## 📌 프로젝트 정체성
+*   **타겟 대상:** 국립공주대학교 천안캠퍼스 재학생 및 휴학생.
+*   **사용자 인증:** `@smail.kongju.ac.kr` 도메인 이메일 계정으로만 가입 및 이용 가능.
+*   **브랜딩:** 공주대학교 공식 **UI(University Identity)** 컬러 및 아이콘 시스템을 완벽하게 통합.
 
-- **실시간 지도 기반 서비스**: 네이버 지도 API를 활용하여 캠퍼스 내 모임 위치를 한눈에 파악.
-- **모임 관리**: 카테고리별 모임 생성, 참여 신청 및 자유로운 참여 취소(참여 포기) 기능.
-- **다국어 지원**: 한국어, 영어, 러시아어의 3개 국어를 완벽하게 지원.
-- **다크 모드 지원**: 사용자 설정에 따른 라이트/다크 모드 테마 적용.
-- **사용자 프로필**: 닉네임 설정 및 프로필 사진 업로드/변경 기능 (Firebase Storage 연동).
-- **보안 및 인증**: Firebase Auth를 통한 이메일 인증 기반의 안전한 회원가입.
+## 🚀 고도화된 기술 스택
+*   **Framework:** Flutter (3.x) - 최상의 안정성을 위해 **Skia 렌더링 엔진** 사용 (Impeller 최적화).
+*   **State Management:** **Riverpod 3.0 (Notifier-based)** - 반응형이고 효율적인 데이터 흐름 제어.
+*   **Backend:** Firebase (Auth, Firestore, Storage) - **Atomic Batch** 작업을 통한 데이터 무결성 보장.
+*   **Maps:** Naver Maps SDK - **인스타그램 스타일의 탐색 모드(Explore Mode)** 구현.
+*   **UI/UX:** 글래스모피즘(Glassmorphism), 스켈레톤 로딩(Skeleton Loading), 햅틱 피드백(Haptic Feedback) 적용.
 
-## 🛠 기술 스택
+## 🛠 주요 프리미엄 기능
+1.  **인스타그램 스타일 탐색 모드:** 마커 클릭 시 하단에 카드 슬라이더가 등장하며, 카드를 넘길 때마다 지도가 부드럽게 해당 위치로 이동합니다.
+2.  **몰입형 그룹 상세 페이지:** 지도가 포함된 확장형 시트, 투명한 글래스 스타일 버튼, 햅틱 반응을 통해 끊김 없는 사용자 경험을 제공합니다.
+3.  **카드형 지도 핀(Pin):** 카테고리 아이콘과 KNU 공식 컬러를 결합한 커스텀 마커를 통해 클릭 없이도 활동 종류를 즉시 식별할 수 있습니다.
+4.  **스마트 지오펜싱 (DMZ 대응):** 휴전선의 대각선 곡선을 고려한 정교한 경계 로직을 적용하여, 강원도 북부(인제, 속초 등) 지역은 지원하되 제한 구역 접근 시 "동무 경고" 기능을 제공합니다.
+5.  **클린 코드 아키텍처:** 미사용 코드 제거, 저장소(Repository) 전수 조사, 3개 국어(한국어, 영어, 러시아어) 100% 로컬라이징 완료.
 
-- **Framework**: Flutter (Dart)
-- **State Management**: Flutter Riverpod
-- **Backend**: Firebase (Authentication, Firestore, Storage)
-- **Navigation**: GoRouter
-- **Maps**: Flutter Naver Map
-- **Local Storage**: SharedPreferences
+## 📉 최적화 및 성능
+*   **WebP 이미지 포맷:** 화질 저하 없이 에셋 크기를 70% 이상 절감.
+*   **R8 강력 압축:** 고급 Proguard 규칙을 적용하여 APK 용량 최소화.
+*   **ABI 분할 빌드:** 프로세서 아키텍처별 최적화 빌드 지원 (arm64-v8a 기준 약 22MB).
 
-## 📦 최적화 및 빌드 (Optimization)
-
-본 프로젝트는 최상의 성능과 최소한의 용량을 위해 다음과 같은 최적화가 적용되었습니다:
-- **APK 용량 최적화**: ABI 분할 빌드를 통해 용량을 316MB(Debug)에서 **약 20MB(Release)**로 90% 이상 축소.
-- **지도 성능 최적화**: "고정 중앙 조준점" 방식의 UI와 `onCameraIdle` 감지를 통해 지도 이동 시 렉(Lag)을 완벽히 제거.
-- **리소스 최적화**: 불필요한 미디어 파일 및 디버г 리포트 제거를 통한 앱 경량화.
-
-### 빌드 방법 (최적화된 Release APK)
-
-가장 가볍고 빠른 APK를 생성하려면 터ми널에서 다음 명령어를 실행하세요:
-
+## 🚦 시작하기
+최적화된 릴리스 빌드를 생성하려면 다음 명령어를 실행하세요:
 ```bash
-flutter build apk --release --split-per-abi --obfuscate --split-debug-info=build/app/outputs/symbols --android-skip-build-dependency-validation
+flutter build apk --release --split-per-abi --obfuscate --split-debug-info=build/app/outputs/symbols
 ```
 
-## 📂 프로젝트 구조
+## ⚠️ 법적 고지 (Legal Notice)
+**본 프로젝트는 오픈 소스가 아닙니다.** 모든 권리는 저작권자에게 있습니다. 저작권자의 허가 없는 코드의 복제, 수정, 배포 및 포크(Fork)를 엄격히 금지합니다. 소스 코드는 오직 교육적 목적으로만 열람 가능합니다.
 
-```
-lib/
-├── core/               # 공통 테마, 상수, 로컬라이징, 위젯
-├── features/
-│   ├── auth/           # 로그인, 회원가입, 인증 로직
-│   ├── map/            # 지도 표시, 마커, 모임 생성/상세/위치 선택
-│   ├── profile/        # 내 정보, 프로필 수정
-│   ├── settings/       # 테마 및 언어 설정
-│   └── shell/          # 앱의 기본 레이아웃 및 내би게이션
-└── main.dart           # 앱 진입점 및 초기화
-```
-
-## 📝 라이선스
-
-이 프로젝트는 공주대학교 학생들을 위한 비상업적 목적으로 개발되었습니다.
+---
+*Developed with pride for the KNU community.* 🚀🇰🇷🎓

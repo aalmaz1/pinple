@@ -3,7 +3,6 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:pinple/core/theme/app_theme.dart';
-import 'package:pinple/core/localization/app_localizations.dart';
 import 'package:pinple/features/auth/presentation/login_screen.dart';
 import 'package:pinple/features/auth/presentation/signup_screen.dart';
 import 'package:pinple/features/auth/providers/auth_provider.dart';

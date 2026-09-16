@@ -1,7 +1,9 @@
+import 'dart:async';
+import 'dart:ui';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_naver_map/flutter_naver_map.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 import 'package:pinple/core/localization/app_localizations.dart';
 import 'package:pinple/core/theme/app_theme.dart';
 import 'package:pinple/core/utils/category_helpers.dart';
@@ -9,179 +11,217 @@ import 'package:pinple/core/widgets/app_widgets.dart';
 import 'package:pinple/features/auth/providers/auth_provider.dart';
 import 'package:pinple/features/map/domain/group_model.dart';
 import 'package:pinple/features/map/providers/group_provider.dart';
+import 'package:pinple/features/settings/providers/settings_provider.dart';
+import 'package:go_router/go_router.dart';
 
-class GroupDetailScreen extends ConsumerWidget {
+class GroupDetailScreen extends ConsumerStatefulWidget {
   final String groupId;
 
   const GroupDetailScreen({super.key, required this.groupId});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final groupAsync = ref.watch(groupDetailProvider(groupId));
+  ConsumerState<GroupDetailScreen> createState() => _GroupDetailScreenState();
+}
+
+class _GroupDetailScreenState extends ConsumerState<GroupDetailScreen> {
+  @override
+  Widget build(BuildContext context) {
+    final groupAsync = ref.watch(groupDetailProvider(widget.groupId));
     final currentUid = FirebaseAuth.instance.currentUser?.uid;
     final l10n = ref.watch(l10nProvider);
+    final settings = ref.watch(settingsProvider);
+
+    final isNightMode =
+        settings.themeMode == AppThemeMode.dark ||
+        (settings.themeMode == AppThemeMode.system &&
+            MediaQuery.platformBrightnessOf(context) == Brightness.dark);
 
     return groupAsync.when(
-      loading: () => const Scaffold(body: Center(child: AppLoader())),
-      error: (e, _) => Scaffold(
-        appBar: AppBar(title: Text(l10n.map)),
-        body: Center(child: Text('${l10n.error}: $e')),
-      ),
+      loading: () => const Center(child: AppLoader()),
+      error: (e, _) => Center(child: Text('${l10n.error}: $e')),
       data: (group) {
-        if (group == null) {
-          return Scaffold(
-            appBar: AppBar(title: Text(l10n.map)),
-            body: Center(child: Text(l10n.infoLoadError)),
-          );
-        }
+        if (group == null) return Center(child: Text(l10n.infoLoadError));
 
         final isOwner = currentUid == group.ownerId;
         final isMember = group.memberIds.contains(currentUid);
         final color = categoryColor(group.category);
         final icon = categoryIcon(group.category);
 
-        return Scaffold(
-          appBar: AppBar(
-            title: Text(l10n.map),
-            actions: isOwner
-                ? [
-                    IconButton(
-                      icon: const Icon(Icons.edit_rounded),
-                      onPressed: () => context.push('/group/${group.id}/edit'),
-                    ),
-                    IconButton(
-                      icon: const Icon(Icons.delete_outline_rounded),
-                      onPressed: () =>
-                          _confirmDelete(context, ref, group, l10n),
-                    ),
-                  ]
-                : null,
-          ),
-          body: SingleChildScrollView(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Hero section
-                Padding(
-                  padding: const EdgeInsets.all(AppSpacing.xl),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          IconBadge(icon: icon, color: color, size: 56),
-                          const Spacer(),
-                          Icon(
-                            Icons.people_rounded,
-                            size: 16,
-                            color: AppColors.textSubtle,
-                          ),
-                          const SizedBox(width: AppSpacing.xs),
-                          Text(
-                            '${group.memberIds.length}/${group.maxMembers}${l10n.memberSuffix}',
-                            style: Theme.of(context).textTheme.labelMedium
-                                ?.copyWith(color: AppColors.textSubtle),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: AppSpacing.xl),
-                      Text(
-                        group.title,
-                        style: Theme.of(context).textTheme.headlineMedium
-                            ?.copyWith(fontWeight: FontWeight.w700),
-                      ),
-                      const SizedBox(height: AppSpacing.sm),
-                      Row(
-                        children: [
-                          const Icon(
-                            Icons.person_rounded,
-                            size: 16,
-                            color: AppColors.textSubtle,
-                          ),
-                          const SizedBox(width: AppSpacing.xs),
-                          Text(
-                            '${l10n.createdBy}: ${group.ownerNickname}',
-                            style: Theme.of(context).textTheme.bodyMedium
-                                ?.copyWith(color: AppColors.textSubtle),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: AppSpacing.xs),
-                      Row(
-                        children: [
-                          const Icon(
-                            Icons.location_on_rounded,
-                            size: 16,
-                            color: AppColors.textSubtle,
-                          ),
-                          const SizedBox(width: AppSpacing.xs),
-                          Text(
-                            group.locationName,
-                            style: Theme.of(context).textTheme.bodyMedium
-                                ?.copyWith(color: AppColors.textSubtle),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
+        return DraggableScrollableSheet(
+          initialChildSize: 0.95,
+          minChildSize: 0.6,
+          maxChildSize: 0.95,
+          builder: (context, scrollController) {
+            return Container(
+              decoration: BoxDecoration(
+                color: Theme.of(context).scaffoldBackgroundColor,
+                borderRadius: const BorderRadius.vertical(
+                  top: Radius.circular(AppRadius.xxl),
                 ),
-
-                const SizedBox(height: AppSpacing.xxl),
-                const Divider(color: AppColors.borderSubtle),
-
-                // Description block
-                Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: AppSpacing.xl,
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      SectionTitle(
-                        title: l10n.introduction,
-                        padding: const EdgeInsets.only(
-                          top: AppSpacing.lg,
-                          bottom: AppSpacing.md,
-                        ),
-                      ),
-                      Text(
-                        group.description,
-                        style: Theme.of(context).textTheme.bodyLarge,
-                      ),
-                      const SizedBox(height: AppSpacing.xxl),
-                    ],
-                  ),
+              ),
+              child: ClipRRect(
+                borderRadius: const BorderRadius.vertical(
+                  top: Radius.circular(AppRadius.xxl),
                 ),
-
-                // Join requests (owner only)
-                if (isOwner)
-                  Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: AppSpacing.xl,
+                child: ListView(
+                  controller: scrollController,
+                  padding: EdgeInsets.zero,
+                  children: [
+                    // 1. Mini Map Header
+                    SliverLikeHeader(
+                      group: group,
+                      color: color,
+                      isNightMode: isNightMode,
+                      isOwner: isOwner,
+                      l10n: l10n,
+                      onDelete: () => _confirmDelete(context, ref, group, l10n),
                     ),
-                    child: _buildJoinRequests(context, ref, l10n),
-                  ),
 
-                // Bottom action area
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(
-                    AppSpacing.xl,
-                    0,
-                    AppSpacing.xl,
-                    AppSpacing.xxxl,
+                    // 2. Info Content
+                    Padding(
+                      padding: const EdgeInsets.all(AppSpacing.xl),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              IconBadge(icon: icon, color: color, size: 56),
+                              const SizedBox(width: AppSpacing.lg),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    CategoryChip(
+                                      label: localizedCategory(
+                                        group.category,
+                                        l10n,
+                                      ),
+                                      color: color,
+                                    ),
+                                    const SizedBox(height: 4),
+                                    Text(
+                                      group.title,
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .headlineSmall
+                                          ?.copyWith(
+                                            fontWeight: FontWeight.w800,
+                                          ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: AppSpacing.xxl),
+                          _InfoRow(
+                            icon: Icons.people_rounded,
+                            label:
+                                '${group.memberIds.length}/${group.maxMembers}${l10n.memberSuffix}',
+                          ),
+                          const SizedBox(height: AppSpacing.md),
+                          _InfoRow(
+                            icon: Icons.person_rounded,
+                            label: '${l10n.createdBy}: ${group.ownerNickname}',
+                          ),
+                          const SizedBox(height: AppSpacing.md),
+                          _InfoRow(
+                            icon: Icons.location_on_rounded,
+                            label: group.locationName,
+                          ),
+                          const Padding(
+                            padding: EdgeInsets.symmetric(
+                              vertical: AppSpacing.xxl,
+                            ),
+                            child: Divider(),
+                          ),
+                          _SectionHeader(
+                            title: l10n.introduction,
+                            icon: Icons.notes_rounded,
+                          ),
+                          const SizedBox(height: AppSpacing.md),
+                          Text(
+                            group.description,
+                            style: Theme.of(
+                              context,
+                            ).textTheme.bodyLarge?.copyWith(height: 1.6),
+                          ),
+                          if (isOwner) ...[
+                            const SizedBox(height: AppSpacing.xxl),
+                            _buildJoinRequests(context, ref, group.id, l10n),
+                          ],
+                          const SizedBox(height: AppSpacing.xxl),
+                          _buildActionButton(
+                            context,
+                            ref,
+                            group,
+                            isOwner,
+                            isMember,
+                            l10n,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  void _confirmDelete(
+    BuildContext context,
+    WidgetRef ref,
+    GroupModel group,
+    L10n l10n,
+  ) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (ctx) {
+        bool isDeleting = false;
+        return StatefulBuilder(
+          builder: (context, setDialogState) {
+            return AlertDialog(
+              title: Text(l10n.deleteConfirmTitle),
+              content: Text(l10n.deleteConfirmMessage),
+              actions: [
+                if (!isDeleting)
+                  TextButton(
+                    onPressed: () => Navigator.pop(ctx),
+                    child: Text(l10n.cancel),
                   ),
-                  child: _buildActionButton(
-                    context,
-                    ref,
-                    group,
-                    isOwner,
-                    isMember,
-                    l10n,
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.error,
                   ),
+                  onPressed: isDeleting
+                      ? null
+                      : () async {
+                          setDialogState(() => isDeleting = true);
+                          try {
+                            await ref
+                                .read(groupRepositoryProvider)
+                                .deleteGroup(group.id);
+                            ref.invalidate(activeGroupsProvider);
+                            if (ctx.mounted) Navigator.pop(ctx);
+                            if (context.mounted) Navigator.pop(context);
+                          } catch (e) {
+                            if (context.mounted) {
+                              setDialogState(() => isDeleting = false);
+                            }
+                          }
+                        },
+                  child: isDeleting
+                      ? const AppLoader(size: 20, color: Colors.white)
+                      : Text(l10n.deleteGroup),
                 ),
               ],
-            ),
-          ),
+            );
+          },
         );
       },
     );
@@ -196,139 +236,49 @@ class GroupDetailScreen extends ConsumerWidget {
     L10n l10n,
   ) {
     if (isOwner) return const SizedBox.shrink();
-
     if (!isMember && !group.isFull) {
-      return SizedBox(
-        width: double.infinity,
-        child: ElevatedButton(
-          onPressed: () => _showJoinDialog(context, ref, group, l10n),
-          child: Text(l10n.joining),
-        ),
+      return ElevatedButton(
+        onPressed: () => _showJoinDialog(context, ref, group, l10n),
+        child: Text(l10n.joining),
       );
     }
-
     if (isMember) {
-      return Column(
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Icon(
-                Icons.check_circle_rounded,
-                size: 18,
-                color: AppColors.success,
-              ),
-              const SizedBox(width: AppSpacing.sm),
-              Text(
-                l10n.joined,
-                style: Theme.of(
-                  context,
-                ).textTheme.titleMedium?.copyWith(color: AppColors.success),
-              ),
-            ],
-          ),
-          const SizedBox(height: AppSpacing.md),
-          TextButton(
-            onPressed: () => _confirmLeave(context, ref, group, l10n),
-            style: TextButton.styleFrom(foregroundColor: AppColors.error),
-            child: Text(l10n.leaveGroup),
-          ),
-        ],
-      );
-    }
-
-    if (group.isFull) {
-      return Center(
-        child: Text(
-          l10n.fullMembers,
-          style: Theme.of(
-            context,
-          ).textTheme.bodyMedium?.copyWith(color: AppColors.textSubtle),
+      return OutlinedButton.icon(
+        onPressed: () => _confirmLeave(context, ref, group, l10n),
+        icon: const Icon(Icons.exit_to_app_rounded, size: 20),
+        label: Text(l10n.leaveGroup),
+        style: OutlinedButton.styleFrom(
+          foregroundColor: AppColors.error,
+          side: const BorderSide(color: AppColors.error),
         ),
       );
     }
-
     return const SizedBox.shrink();
   }
 
-  Widget _buildJoinRequests(BuildContext context, WidgetRef ref, L10n l10n) {
+  Widget _buildJoinRequests(
+    BuildContext context,
+    WidgetRef ref,
+    String groupId,
+    L10n l10n,
+  ) {
     final requestsAsync = ref.watch(joinRequestsProvider(groupId));
-
     return requestsAsync.when(
-      loading: () => const SizedBox.shrink(),
-      error: (e, _) => const SizedBox.shrink(),
+      loading: () => const Center(child: AppLoader()),
+      error: (_, error) => const SizedBox.shrink(),
       data: (requests) {
         if (requests.isEmpty) return const SizedBox.shrink();
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            SectionTitle(
+            _SectionHeader(
               title: '${l10n.joining} (${requests.length})',
-              padding: const EdgeInsets.only(bottom: AppSpacing.md),
+              icon: Icons.person_add_rounded,
             ),
+            const SizedBox(height: AppSpacing.md),
             ...requests.map(
-              (req) => Padding(
-                padding: const EdgeInsets.only(bottom: AppSpacing.md),
-                child: Container(
-                  padding: const EdgeInsets.all(AppSpacing.lg),
-                  decoration: BoxDecoration(
-                    color: AppColors.bg,
-                    borderRadius: BorderRadius.circular(AppRadius.lg),
-                    border: Border.all(color: AppColors.borderSubtle, width: 1),
-                  ),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              req.requesterNickname,
-                              style: Theme.of(context).textTheme.titleMedium,
-                            ),
-                            if (req.message.isNotEmpty) ...[
-                              const SizedBox(height: AppSpacing.xs),
-                              Text(
-                                req.message,
-                                style: Theme.of(context).textTheme.bodyMedium
-                                    ?.copyWith(color: AppColors.textSubtle),
-                              ),
-                            ],
-                          ],
-                        ),
-                      ),
-                      const SizedBox(width: AppSpacing.sm),
-                      Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          _AcceptButton(
-                            onPressed: () {
-                              ref
-                                  .read(groupRepositoryProvider)
-                                  .acceptJoinRequest(
-                                    req.id,
-                                    groupId,
-                                    req.requesterId,
-                                  );
-                            },
-                          ),
-                          const SizedBox(width: AppSpacing.sm),
-                          _RejectButton(
-                            onPressed: () {
-                              ref
-                                  .read(groupRepositoryProvider)
-                                  .rejectJoinRequest(req.id);
-                            },
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-              ),
+              (req) => _JoinRequestItem(req: req, groupId: groupId),
             ),
-            const SizedBox(height: AppSpacing.lg),
           ],
         );
       },
@@ -342,8 +292,6 @@ class GroupDetailScreen extends ConsumerWidget {
     L10n l10n,
   ) {
     final messageController = TextEditingController();
-    final currentUser = FirebaseAuth.instance.currentUser;
-
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
@@ -362,17 +310,16 @@ class GroupDetailScreen extends ConsumerWidget {
           ),
           ElevatedButton(
             onPressed: () async {
+              final user = FirebaseAuth.instance.currentUser!;
               final userData = await ref
                   .read(authRepositoryProvider)
-                  .getUserData(currentUser!.uid);
+                  .getUserData(user.uid);
               final nickname =
-                  (userData?['displayName'] as String?) ??
-                  currentUser.email ??
-                  '';
+                  (userData?['displayName'] as String?) ?? user.email ?? '';
               final request = JoinRequestModel(
                 id: '',
                 groupId: group.id,
-                requesterId: currentUser.uid,
+                requesterId: user.uid,
                 requesterNickname: nickname,
                 message: messageController.text.trim(),
                 status: 'pending',
@@ -399,9 +346,6 @@ class GroupDetailScreen extends ConsumerWidget {
     GroupModel group,
     L10n l10n,
   ) {
-    final currentUser = FirebaseAuth.instance.currentUser;
-    if (currentUser == null) return;
-
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
@@ -415,15 +359,12 @@ class GroupDetailScreen extends ConsumerWidget {
           ElevatedButton(
             style: ElevatedButton.styleFrom(backgroundColor: AppColors.error),
             onPressed: () async {
+              final user = FirebaseAuth.instance.currentUser!;
               await ref
                   .read(groupRepositoryProvider)
-                  .leaveGroup(group.id, currentUser.uid);
+                  .leaveGroup(group.id, user.uid);
               if (ctx.mounted) Navigator.pop(ctx);
-              if (context.mounted) {
-                ScaffoldMessenger.of(
-                  context,
-                ).showSnackBar(SnackBar(content: Text(l10n.leaveConfirmTitle)));
-              }
+              if (context.mounted) Navigator.pop(context);
             },
             child: Text(l10n.confirm),
           ),
@@ -431,129 +372,274 @@ class GroupDetailScreen extends ConsumerWidget {
       ),
     );
   }
+}
 
-  void _confirmDelete(
-    BuildContext context,
-    WidgetRef ref,
-    GroupModel group,
-    L10n l10n,
-  ) {
-    bool isDeleting = false;
+class SliverLikeHeader extends StatelessWidget {
+  final GroupModel group;
+  final Color color;
+  final bool isNightMode;
+  final bool isOwner;
+  final L10n l10n;
+  final VoidCallback onDelete;
 
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (ctx) {
-        return StatefulBuilder(
-          builder: (context, setDialogState) {
-            return AlertDialog(
-              title: Text(l10n.deleteConfirmTitle),
-              content: Text(l10n.deleteConfirmMessage),
-              actions: [
-                TextButton(
-                  onPressed: isDeleting ? null : () => Navigator.pop(ctx),
-                  child: Text(l10n.cancel),
-                ),
-                SizedBox(
-                  width: 100,
-                  height: 40,
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.error,
-                      padding: EdgeInsets.zero,
+  const SliverLikeHeader({
+    super.key,
+    required this.group,
+    required this.color,
+    required this.isNightMode,
+    required this.isOwner,
+    required this.l10n,
+    required this.onDelete,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      children: [
+        SizedBox(
+          height: 240,
+          width: double.infinity,
+          child: NaverMap(
+            options: NaverMapViewOptions(
+              initialCameraPosition: NCameraPosition(
+                target: NLatLng(group.latitude, group.longitude),
+                zoom: 15,
+              ),
+              scrollGesturesEnable: false,
+              zoomGesturesEnable: false,
+              tiltGesturesEnable: false,
+              rotationGesturesEnable: false,
+              stopGesturesEnable: true,
+              nightModeEnable: isNightMode,
+            ),
+            onMapReady: (controller) async {
+              final color = categoryColor(group.category);
+              final icon = categoryIcon(group.category);
+
+              final markerIcon = await NOverlayImage.fromWidget(
+                widget: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(6),
+                      decoration: BoxDecoration(
+                        color: color,
+                        borderRadius: BorderRadius.circular(10),
+                        boxShadow: const [
+                          BoxShadow(
+                            color: Colors.black26,
+                            blurRadius: 4,
+                            offset: Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                      child: Icon(icon, color: Colors.white, size: 20),
                     ),
-                    onPressed: isDeleting
-                        ? null
-                        : () async {
-                            setDialogState(() => isDeleting = true);
-                            try {
-                              // Perform deletion
-                              await ref
-                                  .read(groupRepositoryProvider)
-                                  .deleteGroup(group.id);
+                    Transform.translate(
+                      offset: const Offset(0, -6),
+                      child: Transform.rotate(
+                        angle: 0.785,
+                        child: Container(
+                          width: 12,
+                          height: 12,
+                          decoration: BoxDecoration(
+                            color: color,
+                            borderRadius: const BorderRadius.only(
+                              bottomRight: Radius.circular(2),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                size: const Size(44, 54),
+                context: context,
+              );
 
-                              // 1. Close dialog immediately
-                              if (ctx.mounted) Navigator.pop(ctx);
-
-                              // 2. Navigate to map BEFORE invalidating
-                              if (context.mounted) context.go('/map');
-
-                              // 3. Invalidate providers after a small delay to avoid Stream errors on the closed screen
-                              Future.delayed(
-                                const Duration(milliseconds: 100),
-                                () {
-                                  ref.invalidate(activeGroupsProvider);
-                                },
-                              );
-                            } catch (e) {
-                              if (context.mounted) {
-                                setDialogState(() => isDeleting = false);
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(content: Text('${l10n.error}: $e')),
-                                );
-                              }
-                            }
-                          },
-                    child: isDeleting
-                        ? const AppLoader(size: 20, color: Colors.white)
-                        : Text(l10n.deleteGroup),
-                  ),
+              final marker = NMarker(
+                id: 'detail_marker',
+                position: NLatLng(group.latitude, group.longitude),
+                icon: markerIcon,
+              );
+              controller.addOverlay(marker);
+            },
+          ),
+        ),
+        Positioned(
+          top: 12,
+          left: 0,
+          right: 0,
+          child: Center(
+            child: Container(
+              width: 40,
+              height: 5,
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.5),
+                borderRadius: BorderRadius.circular(2.5),
+              ),
+            ),
+          ),
+        ),
+        if (isOwner)
+          Positioned(
+            top: 20,
+            right: 20,
+            child: Row(
+              children: [
+                _GlassCircleIcon(
+                  icon: Icons.edit_rounded,
+                  onTap: () {
+                    Navigator.pop(context);
+                    context.push('/group/${group.id}/edit');
+                  },
+                ),
+                const SizedBox(width: 12),
+                _GlassCircleIcon(
+                  icon: Icons.delete_outline_rounded,
+                  color: AppColors.error,
+                  onTap: onDelete,
                 ),
               ],
-            );
-          },
-        );
-      },
-    );
-  }
-}
-
-class _AcceptButton extends StatelessWidget {
-  final VoidCallback onPressed;
-
-  const _AcceptButton({required this.onPressed});
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      width: 36,
-      height: 36,
-      child: Material(
-        color: AppColors.success,
-        borderRadius: BorderRadius.circular(AppRadius.sm),
-        child: InkWell(
-          onTap: onPressed,
-          borderRadius: BorderRadius.circular(AppRadius.sm),
-          child: const Icon(Icons.check_rounded, size: 18, color: Colors.white),
+            ),
+          ),
+        Positioned(
+          top: 20,
+          left: 20,
+          child: _GlassCircleIcon(
+            icon: Icons.close_rounded,
+            onTap: () => Navigator.pop(context),
+          ),
         ),
-      ),
+      ],
     );
   }
 }
 
-class _RejectButton extends StatelessWidget {
-  final VoidCallback onPressed;
+class _GlassCircleIcon extends StatelessWidget {
+  final IconData icon;
+  final VoidCallback onTap;
+  final Color? color;
 
-  const _RejectButton({required this.onPressed});
+  const _GlassCircleIcon({required this.icon, required this.onTap, this.color});
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      width: 36,
-      height: 36,
-      child: Material(
-        color: AppColors.fill,
-        borderRadius: BorderRadius.circular(AppRadius.sm),
-        child: InkWell(
-          onTap: onPressed,
-          borderRadius: BorderRadius.circular(AppRadius.sm),
-          child: const Icon(
-            Icons.close_rounded,
-            size: 18,
-            color: AppColors.textSubtle,
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(100),
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+        child: Container(
+          decoration: BoxDecoration(
+            color: (color ?? (isDark ? Colors.black : Colors.white)).withValues(
+              alpha: 0.4,
+            ),
+            shape: BoxShape.circle,
+            border: Border.all(
+              color: Colors.white.withValues(alpha: 0.2),
+              width: 1,
+            ),
+          ),
+          child: IconButton(
+            icon: Icon(
+              icon,
+              color: color != null
+                  ? Colors.white
+                  : Theme.of(context).colorScheme.onSurface,
+              size: 20,
+            ),
+            onPressed: onTap,
           ),
         ),
       ),
     );
   }
+}
+
+class _InfoRow extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  const _InfoRow({required this.icon, required this.label});
+  @override
+  Widget build(BuildContext context) => Row(
+    children: [
+      Icon(icon, size: 20, color: AppColors.textSubtle),
+      const SizedBox(width: AppSpacing.md),
+      Expanded(
+        child: Text(label, style: Theme.of(context).textTheme.bodyLarge),
+      ),
+    ],
+  );
+}
+
+class _SectionHeader extends StatelessWidget {
+  final String title;
+  final IconData icon;
+  const _SectionHeader({required this.title, required this.icon});
+  @override
+  Widget build(BuildContext context) => Row(
+    children: [
+      Icon(icon, size: 20, color: AppColors.primary),
+      const SizedBox(width: AppSpacing.sm),
+      Text(
+        title,
+        style: Theme.of(
+          context,
+        ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+      ),
+    ],
+  );
+}
+
+class _JoinRequestItem extends ConsumerWidget {
+  final JoinRequestModel req;
+  final String groupId;
+  const _JoinRequestItem({required this.req, required this.groupId});
+  @override
+  Widget build(BuildContext context, WidgetRef ref) => Container(
+    margin: const EdgeInsets.only(bottom: AppSpacing.md),
+    padding: const EdgeInsets.all(AppSpacing.lg),
+    decoration: BoxDecoration(
+      color: Theme.of(context).colorScheme.surface,
+      borderRadius: BorderRadius.circular(AppRadius.lg),
+      border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
+    ),
+    child: Row(
+      children: [
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                req.requesterNickname,
+                style: Theme.of(context).textTheme.titleMedium,
+              ),
+              if (req.message.isNotEmpty)
+                Text(
+                  req.message,
+                  style: Theme.of(
+                    context,
+                  ).textTheme.bodySmall?.copyWith(color: AppColors.textSubtle),
+                ),
+            ],
+          ),
+        ),
+        IconButton(
+          icon: const Icon(
+            Icons.check_circle_rounded,
+            color: AppColors.success,
+          ),
+          onPressed: () => ref
+              .read(groupRepositoryProvider)
+              .acceptJoinRequest(req.id, groupId, req.requesterId),
+        ),
+        IconButton(
+          icon: const Icon(Icons.cancel_rounded, color: AppColors.error),
+          onPressed: () =>
+              ref.read(groupRepositoryProvider).rejectJoinRequest(req.id),
+        ),
+      ],
+    ),
+  );
 }

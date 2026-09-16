@@ -5,15 +5,15 @@ import 'package:pinple/core/localization/app_localizations.dart';
 Color categoryColor(String categoryId) {
   switch (categoryId) {
     case 'study':
-      return AppColors.categoryStudy;
+      return AppColors.primary; // KNU Blue
     case 'exercise':
-      return AppColors.categoryExercise;
+      return AppColors.success; // KNU Green #1CA546
     case 'meal':
-      return AppColors.categoryMeal;
+      return const Color(0xFFFF9F1C); // Warm Orange
     case 'hobby':
-      return AppColors.categoryHobby;
+      return const Color(0xFF8B5CF6); // Creative Purple
     default:
-      return AppColors.categoryOther;
+      return const Color(0xFF8B95A1); // Neutral Grey
   }
 }
 

@@ -30,3 +30,16 @@
 -optimizationpasses 5
 -allowaccessmodification
 -dontpreverify
+
+# Strip Debug Attributes
+-renamesourcefileattribute SourceFile
+-keepattributes SourceFile,LineNumberTable
+
+# Strip Reflection for efficiency
+-dontnote **
+-dontwarn **
+
+# Strip assertions
+-assumenosideeffects class ** {
+    static *** assert*(...);
+}

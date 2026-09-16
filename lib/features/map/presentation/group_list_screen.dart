@@ -6,6 +6,7 @@ import 'package:pinple/core/theme/app_theme.dart';
 import 'package:pinple/core/utils/distance.dart';
 import 'package:pinple/core/widgets/app_widgets.dart';
 import 'package:pinple/core/widgets/group_card.dart';
+import 'package:pinple/core/widgets/skeleton.dart';
 import 'package:pinple/features/location_gate/providers/location_provider.dart';
 import 'package:pinple/features/map/domain/group_model.dart';
 import 'package:pinple/features/map/providers/group_provider.dart';
@@ -41,7 +42,17 @@ class GroupListScreen extends ConsumerWidget {
           ),
           Expanded(
             child: groupsAsync.when(
-              loading: () => const Center(child: AppLoader()),
+              loading: () => ListView.separated(
+                padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xl),
+                itemCount: 5,
+                separatorBuilder: (_, __) =>
+                    const SizedBox(height: AppSpacing.md),
+                itemBuilder: (_, __) => const Skeleton(
+                  width: double.infinity,
+                  height: 120,
+                  borderRadius: AppRadius.lg,
+                ),
+              ),
               error: (e, _) => EmptyState(
                 icon: Icons.error_outline_rounded,
                 title: l10n.errorLoadingGroups,
