@@ -1,4 +1,5 @@
 import 'dart:ui';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_naver_map/flutter_naver_map.dart';
@@ -8,6 +9,9 @@ import 'package:pinple/core/constants/campus_constants.dart';
 import 'package:pinple/core/localization/app_localizations.dart';
 import 'package:pinple/core/theme/app_theme.dart';
 import 'package:pinple/core/utils/category_helpers.dart';
+import 'package:pinple/core/utils/geo_helpers.dart';
+import 'package:pinple/core/utils/weather_service.dart';
+import 'package:pinple/features/auth/providers/auth_provider.dart';
 import 'package:pinple/features/map/domain/group_model.dart';
 import 'package:pinple/features/map/presentation/group_detail_screen.dart';
 import 'package:pinple/features/map/presentation/widgets/group_bottom_sheet.dart';
@@ -28,9 +32,22 @@ class _MapScreenState extends ConsumerState<MapScreen> {
   int _currentPage = 0;
   bool _isExploring = false;
 
+  // Cache for marker images to improve performance
+  final Map<String, NOverlayImage> _markerCache = {};
+
+  @override
+  void initState() {
+    super.initState();
+    final user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      ref.read(authRepositoryProvider).updateFcmToken(user.uid);
+    }
+  }
+
   @override
   void dispose() {
     _pageController.dispose();
+    _markerCache.clear();
     super.dispose();
   }
 
@@ -54,6 +71,16 @@ class _MapScreenState extends ConsumerState<MapScreen> {
     ref.listen(activeGroupsProvider, (previous, next) {
       if (next.hasValue) {
         _setMarkers(next.value!);
+        _checkPendingLink(next.value!);
+      }
+    });
+
+    ref.listen(pendingDeepLinkProvider, (prev, next) {
+      if (next != null) {
+        final groups = ref.read(activeGroupsProvider).value;
+        if (groups != null) {
+          _checkPendingLink(groups);
+        }
       }
     });
 
@@ -62,6 +89,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
       extendBodyBehindAppBar: true,
       body: Stack(
         children: [
+          // 1. Naver Map
           RepaintBoundary(
             child: NaverMap(
               options: NaverMapViewOptions(
@@ -87,6 +115,16 @@ class _MapScreenState extends ConsumerState<MapScreen> {
               },
             ),
           ),
+
+          // 2. Top Dynamic Weather Island
+          Positioned(
+            top: MediaQuery.of(context).padding.top + AppSpacing.md,
+            left: 0,
+            right: 0,
+            child: const Center(child: _WeatherIsland()),
+          ),
+
+          // 3. Top UI Controls
           Positioned(
             top: MediaQuery.of(context).padding.top + AppSpacing.md,
             left: AppSpacing.lg,
@@ -118,12 +156,14 @@ class _MapScreenState extends ConsumerState<MapScreen> {
                 onTap: () => context.push('/list'),
               ),
             ),
+
+          // 4. Bottom Slider
           if (_isExploring)
             groupsAsync.when(
               data: (groups) {
                 if (groups.isEmpty) return const SizedBox.shrink();
                 return Positioned(
-                  bottom: MediaQuery.of(context).padding.bottom + 10,
+                  bottom: MediaQuery.of(context).padding.bottom + 5,
                   left: 0,
                   right: 0,
                   child: SizedBox(
@@ -146,15 +186,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
                             child: GroupBottomSheet(
                               group: group,
                               onDetailTap: () {
-                                showModalBottomSheet(
-                                  context: context,
-                                  isScrollControlled: true,
-                                  useSafeArea: true,
-                                  showDragHandle: false,
-                                  backgroundColor: Colors.transparent,
-                                  builder: (_) =>
-                                      GroupDetailScreen(groupId: group.id),
-                                );
+                                _showDetailSheet(group);
                               },
                             ),
                           ),
@@ -172,7 +204,10 @@ class _MapScreenState extends ConsumerState<MapScreen> {
       floatingActionButton: _isExploring
           ? null
           : FloatingActionButton.extended(
-              onPressed: () => context.push('/group/create'),
+              onPressed: () {
+                HapticFeedback.lightImpact();
+                context.push('/group/create');
+              },
               icon: const Icon(Icons.add_rounded),
               label: Text(
                 l10n.createGroup,
@@ -181,6 +216,52 @@ class _MapScreenState extends ConsumerState<MapScreen> {
               backgroundColor: AppColors.primary,
               foregroundColor: Colors.white,
             ),
+    );
+  }
+
+  void _checkPendingLink(List<GroupModel> groups) {
+    final pendingId = ref.read(pendingDeepLinkProvider);
+    if (pendingId == null) return;
+
+    final index = groups.indexWhere((g) => g.id == pendingId);
+    if (index != -1) {
+      setState(() {
+        _isExploring = true;
+        _currentPage = index;
+      });
+
+      WidgetsBinding.instance.addPostFrameCallback((_) async {
+        if (_pageController.hasClients) {
+          _pageController.jumpToPage(index);
+        }
+
+        int retry = 0;
+        while (_mapController == null && retry < 10) {
+          await Future.delayed(const Duration(milliseconds: 200));
+          retry++;
+        }
+
+        if (_mapController != null) {
+          _animateCameraToGroup(groups[index]);
+        }
+
+        if (mounted) {
+          _showDetailSheet(groups[index]);
+        }
+
+        ref.read(pendingDeepLinkProvider.notifier).clear();
+      });
+    }
+  }
+
+  void _showDetailSheet(GroupModel group) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      useSafeArea: true,
+      showDragHandle: false,
+      backgroundColor: Colors.transparent,
+      builder: (_) => GroupDetailScreen(groupId: group.id),
     );
   }
 
@@ -196,50 +277,15 @@ class _MapScreenState extends ConsumerState<MapScreen> {
       if (!mounted) return;
       final group = groups[i];
       final color = categoryColor(group.category);
-      final icon = categoryIcon(group.category);
 
-      // Create a custom card-style marker
-      final markerIcon = await NOverlayImage.fromWidget(
-        widget: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              padding: const EdgeInsets.all(6),
-              decoration: BoxDecoration(
-                color: color,
-                borderRadius: BorderRadius.circular(10), // Card shape
-                boxShadow: const [
-                  BoxShadow(
-                    color: Colors.black26,
-                    blurRadius: 4,
-                    offset: Offset(0, 2),
-                  ),
-                ],
-              ),
-              child: Icon(icon, color: Colors.white, size: 20),
-            ),
-            // Small beak/pointer
-            Transform.translate(
-              offset: const Offset(0, -6),
-              child: Transform.rotate(
-                angle: 0.785, // 45 degrees
-                child: Container(
-                  width: 12,
-                  height: 12,
-                  decoration: BoxDecoration(
-                    color: color,
-                    borderRadius: const BorderRadius.only(
-                      bottomRight: Radius.circular(2),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ),
-        size: const Size(44, 54),
-        context: context,
-      );
+      // Performance Optimization: Cache marker images by category
+      NOverlayImage markerIcon;
+      if (_markerCache.containsKey(group.category)) {
+        markerIcon = _markerCache[group.category]!;
+      } else {
+        markerIcon = await createCardMarker(context, group.category);
+        _markerCache[group.category] = markerIcon;
+      }
 
       final marker = NMarker(
         id: group.id,
@@ -288,6 +334,62 @@ class _MapScreenState extends ConsumerState<MapScreen> {
   }
 }
 
+class _WeatherIsland extends ConsumerWidget {
+  const _WeatherIsland();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final weatherAsync = ref.watch(weatherProvider);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    return weatherAsync.when(
+      data: (weather) => AnimatedContainer(
+        duration: const Duration(milliseconds: 500),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        decoration: BoxDecoration(
+          color: (isDark ? Colors.black : Colors.white).withValues(alpha: 0.7),
+          borderRadius: BorderRadius.circular(30),
+          border: Border.all(
+            color: (isDark ? Colors.white : Colors.black).withValues(
+              alpha: 0.1,
+            ),
+            width: 1,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.1),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Image.network(
+              'https://openweathermap.org/img/wn/${weather.iconCode}.png',
+              width: 32,
+              height: 32,
+              errorBuilder: (context, error, stackTrace) =>
+                  const Icon(Icons.wb_sunny_rounded, size: 20),
+            ),
+            const SizedBox(width: 8),
+            Text(
+              'Cheonan ${weather.temp.round()}°C',
+              style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                fontWeight: FontWeight.bold,
+                color: Theme.of(context).colorScheme.onSurface,
+              ),
+            ),
+          ],
+        ),
+      ),
+      loading: () => const SizedBox.shrink(), // Hide while loading
+      error: (error, stack) => const SizedBox.shrink(), // Hide on error
+    );
+  }
+}
+
 class _GlassIconButton extends StatelessWidget {
   final IconData icon;
   final VoidCallback onTap;
@@ -328,7 +430,10 @@ class _GlassIconButton extends StatelessWidget {
           child: Material(
             color: Colors.transparent,
             child: InkWell(
-              onTap: onTap,
+              onTap: () {
+                HapticFeedback.lightImpact();
+                onTap();
+              },
               child: Icon(
                 icon,
                 size: 26,

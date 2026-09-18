@@ -1,18 +1,20 @@
-import 'dart:async';
 import 'dart:ui';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_naver_map/flutter_naver_map.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pinple/core/localization/app_localizations.dart';
 import 'package:pinple/core/theme/app_theme.dart';
 import 'package:pinple/core/utils/category_helpers.dart';
+import 'package:pinple/core/utils/geo_helpers.dart';
 import 'package:pinple/core/widgets/app_widgets.dart';
 import 'package:pinple/features/auth/providers/auth_provider.dart';
 import 'package:pinple/features/map/domain/group_model.dart';
 import 'package:pinple/features/map/providers/group_provider.dart';
 import 'package:pinple/features/settings/providers/settings_provider.dart';
 import 'package:go_router/go_router.dart';
+import 'package:share_plus/share_plus.dart';
 
 class GroupDetailScreen extends ConsumerStatefulWidget {
   final String groupId;
@@ -37,10 +39,15 @@ class _GroupDetailScreenState extends ConsumerState<GroupDetailScreen> {
             MediaQuery.platformBrightnessOf(context) == Brightness.dark);
 
     return groupAsync.when(
-      loading: () => const Center(child: AppLoader()),
-      error: (e, _) => Center(child: Text('${l10n.error}: $e')),
+      loading: () => const Scaffold(body: Center(child: AppLoader())),
+      error: (e, _) => Scaffold(
+        appBar: AppBar(title: Text(l10n.map)),
+        body: Center(child: Text('${l10n.error}: $e')),
+      ),
       data: (group) {
-        if (group == null) return Center(child: Text(l10n.infoLoadError));
+        if (group == null) {
+          return Scaffold(body: Center(child: Text(l10n.infoLoadError)));
+        }
 
         final isOwner = currentUid == group.ownerId;
         final isMember = group.memberIds.contains(currentUid);
@@ -113,7 +120,9 @@ class _GroupDetailScreenState extends ConsumerState<GroupDetailScreen> {
                               ),
                             ],
                           ),
+
                           const SizedBox(height: AppSpacing.xxl),
+
                           _InfoRow(
                             icon: Icons.people_rounded,
                             label:
@@ -129,12 +138,14 @@ class _GroupDetailScreenState extends ConsumerState<GroupDetailScreen> {
                             icon: Icons.location_on_rounded,
                             label: group.locationName,
                           ),
+
                           const Padding(
                             padding: EdgeInsets.symmetric(
                               vertical: AppSpacing.xxl,
                             ),
                             child: Divider(),
                           ),
+
                           _SectionHeader(
                             title: l10n.introduction,
                             icon: Icons.notes_rounded,
@@ -146,10 +157,12 @@ class _GroupDetailScreenState extends ConsumerState<GroupDetailScreen> {
                               context,
                             ).textTheme.bodyLarge?.copyWith(height: 1.6),
                           ),
+
                           if (isOwner) ...[
                             const SizedBox(height: AppSpacing.xxl),
                             _buildJoinRequests(context, ref, group.id, l10n),
                           ],
+
                           const SizedBox(height: AppSpacing.xxl),
                           _buildActionButton(
                             context,
@@ -201,6 +214,7 @@ class _GroupDetailScreenState extends ConsumerState<GroupDetailScreen> {
                   onPressed: isDeleting
                       ? null
                       : () async {
+                          HapticFeedback.heavyImpact();
                           setDialogState(() => isDeleting = true);
                           try {
                             await ref
@@ -238,13 +252,19 @@ class _GroupDetailScreenState extends ConsumerState<GroupDetailScreen> {
     if (isOwner) return const SizedBox.shrink();
     if (!isMember && !group.isFull) {
       return ElevatedButton(
-        onPressed: () => _showJoinDialog(context, ref, group, l10n),
+        onPressed: () {
+          HapticFeedback.lightImpact();
+          _showJoinDialog(context, ref, group, l10n);
+        },
         child: Text(l10n.joining),
       );
     }
     if (isMember) {
       return OutlinedButton.icon(
-        onPressed: () => _confirmLeave(context, ref, group, l10n),
+        onPressed: () {
+          HapticFeedback.mediumImpact();
+          _confirmLeave(context, ref, group, l10n);
+        },
         icon: const Icon(Icons.exit_to_app_rounded, size: 20),
         label: Text(l10n.leaveGroup),
         style: OutlinedButton.styleFrom(
@@ -411,52 +431,13 @@ class SliverLikeHeader extends StatelessWidget {
               rotationGesturesEnable: false,
               stopGesturesEnable: true,
               nightModeEnable: isNightMode,
+              liteModeEnable: true,
             ),
             onMapReady: (controller) async {
-              final color = categoryColor(group.category);
-              final icon = categoryIcon(group.category);
-
-              final markerIcon = await NOverlayImage.fromWidget(
-                widget: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.all(6),
-                      decoration: BoxDecoration(
-                        color: color,
-                        borderRadius: BorderRadius.circular(10),
-                        boxShadow: const [
-                          BoxShadow(
-                            color: Colors.black26,
-                            blurRadius: 4,
-                            offset: Offset(0, 2),
-                          ),
-                        ],
-                      ),
-                      child: Icon(icon, color: Colors.white, size: 20),
-                    ),
-                    Transform.translate(
-                      offset: const Offset(0, -6),
-                      child: Transform.rotate(
-                        angle: 0.785,
-                        child: Container(
-                          width: 12,
-                          height: 12,
-                          decoration: BoxDecoration(
-                            color: color,
-                            borderRadius: const BorderRadius.only(
-                              bottomRight: Radius.circular(2),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                size: const Size(44, 54),
-                context: context,
+              final markerIcon = await createCardMarker(
+                context,
+                group.category,
               );
-
               final marker = NMarker(
                 id: 'detail_marker',
                 position: NLatLng(group.latitude, group.longitude),
@@ -481,12 +462,23 @@ class SliverLikeHeader extends StatelessWidget {
             ),
           ),
         ),
-        if (isOwner)
-          Positioned(
-            top: 20,
-            right: 20,
-            child: Row(
-              children: [
+        Positioned(
+          top: 20,
+          right: 20,
+          child: Row(
+            children: [
+              _GlassCircleIcon(
+                icon: Icons.share_rounded,
+                onTap: () {
+                  HapticFeedback.lightImpact();
+                  Share.share(
+                    '${l10n.shareMessage}\n\nhttps://pinple-5e23e.web.app/group/${group.id}',
+                    subject: group.title,
+                  );
+                },
+              ),
+              if (isOwner) ...[
+                const SizedBox(width: 12),
                 _GlassCircleIcon(
                   icon: Icons.edit_rounded,
                   onTap: () {
@@ -501,8 +493,9 @@ class SliverLikeHeader extends StatelessWidget {
                   onTap: onDelete,
                 ),
               ],
-            ),
+            ],
           ),
+        ),
         Positioned(
           top: 20,
           left: 20,
@@ -549,7 +542,10 @@ class _GlassCircleIcon extends StatelessWidget {
                   : Theme.of(context).colorScheme.onSurface,
               size: 20,
             ),
-            onPressed: onTap,
+            onPressed: () {
+              HapticFeedback.lightImpact();
+              onTap();
+            },
           ),
         ),
       ),

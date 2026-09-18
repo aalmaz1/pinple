@@ -62,7 +62,8 @@ class AppSpacing {
 
 class AppTheme {
   static TextTheme _textTheme({bool isDark = false}) {
-    final base = GoogleFonts.notoSansKrTextTheme();
+    // Switching to IBM Plex Sans KR for a more professional, sharp look
+    final base = GoogleFonts.ibmPlexSansKrTextTheme();
     final textColor = isDark ? AppColors.textStrongDark : AppColors.textStrong;
     final bodyColor = isDark ? AppColors.textDark : AppColors.text;
 

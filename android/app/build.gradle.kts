@@ -54,11 +54,16 @@ android {
             isMinifyEnabled = true
             isShrinkResources = true
             
-            // Optimization for smaller APK size
+            // Extreme optimization
             setProguardFiles(listOf(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             ))
+            
+            // Add this to force resource compression
+            ndk {
+                debugSymbolLevel = "none"
+            }
         }
     }
 

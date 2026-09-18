@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_naver_map/flutter_naver_map.dart';
+import 'package:pinple/core/constants/app_constants.dart';
 import 'package:pinple/core/constants/campus_constants.dart';
 import 'package:pinple/core/localization/app_localizations.dart';
 import 'package:pinple/core/theme/app_theme.dart';
@@ -34,6 +35,55 @@ bool isStrictlySouthKorea(NLatLng? latLng) {
   }
 
   return true;
+}
+
+/// Creates a reusable card-style marker image.
+Future<NOverlayImage> createCardMarker(
+  BuildContext context,
+  String categoryId,
+) async {
+  final category = GroupCategory.fromId(categoryId);
+
+  return await NOverlayImage.fromWidget(
+    widget: Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+          padding: const EdgeInsets.all(6),
+          decoration: BoxDecoration(
+            color: category.color,
+            borderRadius: BorderRadius.circular(10),
+            boxShadow: const [
+              BoxShadow(
+                color: Colors.black26,
+                blurRadius: 4,
+                offset: Offset(0, 2),
+              ),
+            ],
+          ),
+          child: Icon(category.icon, color: Colors.white, size: 20),
+        ),
+        Transform.translate(
+          offset: const Offset(0, -6),
+          child: Transform.rotate(
+            angle: 0.785, // 45 degrees
+            child: Container(
+              width: 12,
+              height: 12,
+              decoration: BoxDecoration(
+                color: category.color,
+                borderRadius: const BorderRadius.only(
+                  bottomRight: Radius.circular(2),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ],
+    ),
+    size: const Size(44, 54),
+    context: context,
+  );
 }
 
 /// Shows the "Comrade Warning" dialog when user tries to pick North Korea.

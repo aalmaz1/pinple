@@ -8,7 +8,6 @@ import 'package:pinple/core/widgets/app_widgets.dart';
 import 'package:pinple/core/widgets/group_card.dart';
 import 'package:pinple/core/widgets/skeleton.dart';
 import 'package:pinple/features/location_gate/providers/location_provider.dart';
-import 'package:pinple/features/map/domain/group_model.dart';
 import 'package:pinple/features/map/providers/group_provider.dart';
 
 class GroupListScreen extends ConsumerWidget {
@@ -16,7 +15,7 @@ class GroupListScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final groupsAsync = ref.watch(activeGroupsProvider);
+    final groupsAsync = ref.watch(sortedGroupsProvider);
     final positionAsync = ref.watch(currentPositionProvider);
     final l10n = ref.watch(l10nProvider);
 
@@ -45,9 +44,9 @@ class GroupListScreen extends ConsumerWidget {
               loading: () => ListView.separated(
                 padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xl),
                 itemCount: 5,
-                separatorBuilder: (_, __) =>
+                separatorBuilder: (_, index) =>
                     const SizedBox(height: AppSpacing.md),
-                itemBuilder: (_, __) => const Skeleton(
+                itemBuilder: (_, index) => const Skeleton(
                   width: double.infinity,
                   height: 120,
                   borderRadius: AppRadius.lg,
@@ -69,7 +68,6 @@ class GroupListScreen extends ConsumerWidget {
 
                 final myLat = positionAsync.value?.latitude;
                 final myLng = positionAsync.value?.longitude;
-                final sorted = _sortByDistance(groups, myLat, myLng);
 
                 return RefreshIndicator(
                   color: AppColors.primary,
@@ -84,15 +82,23 @@ class GroupListScreen extends ConsumerWidget {
                       AppSpacing.xl,
                       AppSpacing.xxl,
                     ),
-                    itemCount: sorted.length,
-                    separatorBuilder: (_, _) =>
+                    itemCount: groups.length,
+                    separatorBuilder: (_, index) =>
                         const SizedBox(height: AppSpacing.md),
                     itemBuilder: (_, i) {
-                      final entry = sorted[i];
+                      final group = groups[i];
+                      final distance = (myLat != null && myLng != null)
+                          ? distanceMeters(
+                              fromLat: myLat,
+                              fromLng: myLng,
+                              toLat: group.latitude,
+                              toLng: group.longitude,
+                            )
+                          : null;
                       return GroupCard(
-                        group: entry.group,
-                        distanceMeters: entry.distance,
-                        onTap: () => context.push('/group/${entry.group.id}'),
+                        group: group,
+                        distanceMeters: distance,
+                        onTap: () => context.push('/group/${group.id}'),
                       );
                     },
                   ),
@@ -104,38 +110,4 @@ class GroupListScreen extends ConsumerWidget {
       ),
     );
   }
-
-  List<_GroupWithDistance> _sortByDistance(
-    List<GroupModel> groups,
-    double? myLat,
-    double? myLng,
-  ) {
-    final entries = groups.map((g) {
-      final d = (myLat != null && myLng != null)
-          ? distanceMeters(
-              fromLat: myLat,
-              fromLng: myLng,
-              toLat: g.latitude,
-              toLng: g.longitude,
-            )
-          : null;
-      return _GroupWithDistance(group: g, distance: d);
-    }).toList();
-
-    entries.sort((a, b) {
-      if (a.distance == null && b.distance == null) return 0;
-      if (a.distance == null) return 1;
-      if (b.distance == null) return -1;
-      return a.distance!.compareTo(b.distance!);
-    });
-
-    return entries;
-  }
-}
-
-class _GroupWithDistance {
-  final GroupModel group;
-  final double? distance;
-
-  _GroupWithDistance({required this.group, this.distance});
 }

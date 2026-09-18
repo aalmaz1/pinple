@@ -17,15 +17,18 @@ dependencies:
   firebase_auth: ^6.7.0
   cloud_firestore: ^6.10.0
   firebase_storage: ^13.6.0
+  firebase_messaging: ^16.7.0
 
   # Media
   image_picker: ^1.1.2
+  share_plus: ^10.1.4
 
   # State Management
   flutter_riverpod: ^3.4.3
 
   # Navigation
   go_router: ^18.0.1
+  app_links: ^6.3.3
 
   # Map
   flutter_naver_map: ^1.2.0
@@ -38,6 +41,7 @@ dependencies:
 
   # Settings
   shared_preferences: ^2.3.5
+  http: ^1.3.0
 
 dev_dependencies:
   flutter_test:

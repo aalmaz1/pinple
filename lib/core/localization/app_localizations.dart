@@ -107,6 +107,8 @@ class L10n {
   String get deleteGroup => get('deleteGroup');
   String get deleteConfirmTitle => get('deleteConfirmTitle');
   String get deleteConfirmMessage => get('deleteConfirmMessage');
+  String get shareGroup => get('shareGroup');
+  String get shareMessage => get('shareMessage');
 }
 
 final l10nProvider = Provider<L10n>((ref) {
@@ -208,6 +210,8 @@ const _ko = {
   'deleteGroup': '삭제',
   'deleteConfirmTitle': '모임 삭제',
   'deleteConfirmMessage': '정말 이 모임을 삭제하시겠습니까?',
+  'shareGroup': '모임 공유하기',
+  'shareMessage': 'Pinple에서 이 모임을 확인해보세요!',
 };
 
 const _en = {
@@ -296,6 +300,8 @@ const _en = {
   'deleteGroup': 'Delete',
   'deleteConfirmTitle': 'Delete Group',
   'deleteConfirmMessage': 'Are you sure you want to delete this group?',
+  'shareGroup': 'Share Group',
+  'shareMessage': 'Check out this group on Pinple!',
 };
 
 const _ru = {
@@ -386,4 +392,6 @@ const _ru = {
   'deleteGroup': 'Удалить',
   'deleteConfirmTitle': 'Удалить встречу',
   'deleteConfirmMessage': 'Вы уверены, что хотите удалить эту встречу?',
+  'shareGroup': 'Поделиться',
+  'shareMessage': 'Посмотри эту встречу в Pinple!',
 };
