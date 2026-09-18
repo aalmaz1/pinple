@@ -1,7 +1,7 @@
 name: pinple
 description: "공주대학교 천안캠퍼스 전용 소모임 앱"
 publish_to: 'none'
-version: 1.0.4+5
+version: 1.0.5+6
 
 environment:
   sdk: ^3.11.4
