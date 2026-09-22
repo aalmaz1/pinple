@@ -8,6 +8,9 @@ class L10n {
 
   String get(String key) => _strings[key] ?? key;
 
+  String get theme => get('theme');
+  String get language => get('language');
+
   // Common strings
   String get appTitle => get('appTitle');
   String get settings => get('settings');
@@ -189,7 +192,7 @@ const _ko = {
   'nicknameEmptyError': '닉네임을 입력해주세요',
   'nicknameLengthError': '닉네임은 2~10자여야 합니다',
   'selectLocationTitle': '장소 선택',
-  'outOfBoundsError': '어디 가너 동무?! 대한민국으로 돌아와야지!',
+  'outOfBoundsError': '대한민국으로 돌아와야지!\n어디 가너 동무?!',
   'done': '완료',
   'dragMapHint': '지도를 움직여 장소를 선택해주세요',
   'backToKorea': '대한민국으로 돌아가기',
@@ -212,6 +215,8 @@ const _ko = {
   'deleteConfirmMessage': '정말 이 모임을 삭제하시겠습니까?',
   'shareGroup': '모임 공유하기',
   'shareMessage': 'Pinple에서 이 모임을 확인해보세요!',
+  'theme': '테마',
+  'language': '언어',
 };
 
 const _en = {
@@ -302,6 +307,8 @@ const _en = {
   'deleteConfirmMessage': 'Are you sure you want to delete this group?',
   'shareGroup': 'Share Group',
   'shareMessage': 'Check out this group on Pinple!',
+  'theme': 'Theme',
+  'language': 'Language',
 };
 
 const _ru = {
@@ -394,4 +401,6 @@ const _ru = {
   'deleteConfirmMessage': 'Вы уверены, что хотите удалить эту встречу?',
   'shareGroup': 'Поделиться',
   'shareMessage': 'Посмотри эту встречу в Pinple!',
+  'theme': 'Тема',
+  'language': 'Язык',
 };

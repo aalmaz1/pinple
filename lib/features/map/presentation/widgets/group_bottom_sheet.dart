@@ -1,3 +1,4 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pinple/core/localization/app_localizations.dart';
@@ -19,6 +20,7 @@ class GroupBottomSheet extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
     final l10n = ref.watch(l10nProvider);
     final color = categoryColor(group.category);
     final icon = categoryIcon(group.category);
@@ -31,10 +33,7 @@ class GroupBottomSheet extends ConsumerWidget {
         AppSpacing.xl,
       ), // Floating effect
       decoration: BoxDecoration(
-        color: theme.colorScheme.surface,
-        borderRadius: BorderRadius.circular(
-          AppRadius.lg,
-        ), // Fully rounded corners
+        borderRadius: BorderRadius.circular(AppRadius.lg),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.15),
@@ -43,88 +42,113 @@ class GroupBottomSheet extends ConsumerWidget {
           ),
         ],
       ),
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.lg,
-        vertical: AppSpacing.md,
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              IconBadge(icon: icon, color: color, size: 48),
-              const SizedBox(width: AppSpacing.lg),
-              Expanded(
-                child: Column(
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(AppRadius.lg),
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 15, sigmaY: 15),
+          child: Container(
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppSpacing.lg,
+              vertical: AppSpacing.md,
+            ),
+            decoration: BoxDecoration(
+              color: (isDark ? Colors.black : Colors.white).withValues(
+                alpha: 0.7,
+              ),
+              borderRadius: BorderRadius.circular(AppRadius.lg),
+              border: Border.all(
+                color: (isDark ? Colors.white : Colors.black).withValues(
+                  alpha: 0.1,
+                ),
+                width: 1,
+              ),
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Row(
-                      children: [
-                        CategoryChip(
-                          label: localizedCategory(group.category, l10n),
-                          color: color,
-                        ),
-                        const Spacer(),
-                        Icon(
-                          Icons.people_rounded,
-                          size: 14,
-                          color: theme.colorScheme.onSurfaceVariant,
-                        ),
-                        const SizedBox(width: AppSpacing.xs),
-                        Text(
-                          '${group.memberIds.length}/${group.maxMembers}${l10n.memberSuffix}',
-                          style: theme.textTheme.labelMedium?.copyWith(
-                            color: theme.colorScheme.onSurfaceVariant,
+                    IconBadge(icon: icon, color: color, size: 48),
+                    const SizedBox(width: AppSpacing.lg),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              CategoryChip(
+                                label: localizedCategory(group.category, l10n),
+                                color: color,
+                              ),
+                              const Spacer(),
+                              Icon(
+                                Icons.people_rounded,
+                                size: 14,
+                                color: theme.colorScheme.onSurfaceVariant,
+                              ),
+                              const SizedBox(width: AppSpacing.xs),
+                              Text(
+                                '${group.memberIds.length}/${group.maxMembers}${l10n.memberSuffix}',
+                                style: theme.textTheme.labelMedium?.copyWith(
+                                  color: theme.colorScheme.onSurfaceVariant,
+                                ),
+                              ),
+                            ],
                           ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: AppSpacing.xs),
-                    Text(
-                      group.title,
-                      style: theme.textTheme.titleLarge?.copyWith(
-                        fontWeight: FontWeight.w700,
+                          const SizedBox(height: AppSpacing.xs),
+                          Text(
+                            group.title,
+                            style: theme.textTheme.titleLarge?.copyWith(
+                              fontWeight: FontWeight.w700,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ],
                       ),
-                      maxLines: 1, // Prevent height change with long titles
-                      overflow: TextOverflow.ellipsis,
                     ),
                   ],
                 ),
-              ),
-            ],
-          ),
-          const SizedBox(height: AppSpacing.lg),
-          Row(
-            children: [
-              const Icon(
-                Icons.location_on_rounded,
-                size: 14,
-                color: AppColors.textSubtle,
-              ),
-              const SizedBox(width: AppSpacing.xs),
-              Expanded(
-                child: Text(
-                  group.locationName,
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    color: AppColors.textSubtle,
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
+                const SizedBox(height: AppSpacing.lg),
+                Row(
+                  children: [
+                    const Icon(
+                      Icons.location_on_rounded,
+                      size: 14,
+                      color: AppColors.textSubtle,
+                    ),
+                    const SizedBox(width: AppSpacing.xs),
+                    Expanded(
+                      child: Text(
+                        group.locationName,
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          color: AppColors.textSubtle,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ],
                 ),
-              ),
-            ],
-          ),
-          const SizedBox(height: AppSpacing.md),
-          SizedBox(
-            width: double.infinity,
-            child: ElevatedButton(
-              onPressed: onDetailTap,
-              child: Text(l10n.showDetails),
+                const SizedBox(height: AppSpacing.md),
+                SizedBox(
+                  width: double.infinity,
+                  height: 48, // Fixed height to prevent overflow
+                  child: ElevatedButton(
+                    onPressed: onDetailTap,
+                    style: ElevatedButton.styleFrom(
+                      minimumSize: Size.zero, // Override global minimumSize
+                      padding: EdgeInsets.zero,
+                    ),
+                    child: Text(l10n.showDetails),
+                  ),
+                ),
+              ],
             ),
           ),
-        ],
+        ),
       ),
     );
   }

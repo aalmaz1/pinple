@@ -393,7 +393,7 @@ class _LocationPickerPageState extends ConsumerState<_LocationPickerPage> {
       appBar: AppBar(
         title: Text(l10n.selectLocationTitle),
         leading: IconButton(
-          icon: const Icon(Icons.close_rounded),
+          icon: const Icon(Icons.arrow_back_rounded),
           onPressed: () => Navigator.pop(context),
         ),
         actions: [

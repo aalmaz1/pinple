@@ -203,18 +203,13 @@ class _MapScreenState extends ConsumerState<MapScreen> {
       ),
       floatingActionButton: _isExploring
           ? null
-          : FloatingActionButton.extended(
-              onPressed: () {
+          : _GlassFAB(
+              label: l10n.createGroup,
+              icon: Icons.add_rounded,
+              onTap: () {
                 HapticFeedback.lightImpact();
                 context.push('/group/create');
               },
-              icon: const Icon(Icons.add_rounded),
-              label: Text(
-                l10n.createGroup,
-                style: const TextStyle(fontWeight: FontWeight.w700),
-              ),
-              backgroundColor: AppColors.primary,
-              foregroundColor: Colors.white,
             ),
     );
   }
@@ -343,49 +338,62 @@ class _WeatherIsland extends ConsumerWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return weatherAsync.when(
-      data: (weather) => AnimatedContainer(
-        duration: const Duration(milliseconds: 500),
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        decoration: BoxDecoration(
-          color: (isDark ? Colors.black : Colors.white).withValues(alpha: 0.7),
-          borderRadius: BorderRadius.circular(30),
-          border: Border.all(
-            color: (isDark ? Colors.white : Colors.black).withValues(
-              alpha: 0.1,
-            ),
-            width: 1,
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.1),
-              blurRadius: 10,
-              offset: const Offset(0, 4),
-            ),
-          ],
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Image.network(
-              'https://openweathermap.org/img/wn/${weather.iconCode}.png',
-              width: 32,
-              height: 32,
-              errorBuilder: (context, error, stackTrace) =>
-                  const Icon(Icons.wb_sunny_rounded, size: 20),
-            ),
-            const SizedBox(width: 8),
-            Text(
-              'Cheonan ${weather.temp.round()}°C',
-              style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                fontWeight: FontWeight.bold,
-                color: Theme.of(context).colorScheme.onSurface,
+      data: (weather) => ClipRRect(
+        borderRadius: BorderRadius.circular(30),
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 500),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            decoration: BoxDecoration(
+              color: (isDark ? Colors.black : Colors.white).withValues(
+                alpha: 0.6,
+              ),
+              borderRadius: BorderRadius.circular(30),
+              border: Border.all(
+                color: (isDark ? Colors.white : Colors.black).withValues(
+                  alpha: 0.15,
+                ),
+                width: 1.5,
               ),
             ),
-          ],
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  weather.emoji,
+                  style: const TextStyle(fontSize: 18),
+                ),
+                const SizedBox(width: 8),
+                Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Cheonan',
+                      style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                        fontWeight: FontWeight.w600,
+                        color: Theme.of(context).colorScheme.onSurface.withValues(
+                          alpha: 0.7,
+                        ),
+                      ),
+                    ),
+                    Text(
+                      '${weather.temp.round()}°C',
+                      style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                        fontWeight: FontWeight.w800,
+                        color: Theme.of(context).colorScheme.onSurface,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
         ),
       ),
-      loading: () => const SizedBox.shrink(), // Hide while loading
-      error: (error, stack) => const SizedBox.shrink(), // Hide on error
+      loading: () => const SizedBox.shrink(),
+      error: (error, stack) => const SizedBox.shrink(),
     );
   }
 }
@@ -446,3 +454,71 @@ class _GlassIconButton extends StatelessWidget {
     );
   }
 }
+
+class _GlassFAB extends StatelessWidget {
+  final String label;
+  final IconData icon;
+  final VoidCallback onTap;
+
+  const _GlassFAB({
+    required this.label,
+    required this.icon,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(30),
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+        child: Container(
+          decoration: BoxDecoration(
+            color: AppColors.primary, // Removed alpha to match '생성하기'
+            borderRadius: BorderRadius.circular(30),
+            border: Border.all(
+              color: Colors.white.withValues(alpha: 0.2),
+              width: 1,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.2),
+                blurRadius: 10,
+                offset: const Offset(0, 4),
+              ),
+            ],
+          ),
+          child: Material(
+            color: Colors.transparent,
+            child: InkWell(
+              onTap: onTap,
+              borderRadius: BorderRadius.circular(30),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 12,
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(icon, color: Colors.white, size: 24),
+                    const SizedBox(width: 8),
+                    Text(
+                      label,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w700,
+                        fontSize: 15,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+

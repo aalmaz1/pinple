@@ -21,20 +21,20 @@ dependencies:
 
   # Media
   image_picker: ^1.1.2
-  share_plus: ^10.1.4
+  share_plus: ^13.3.0
 
   # State Management
   flutter_riverpod: ^3.4.3
 
   # Navigation
   go_router: ^18.0.1
-  app_links: ^6.3.3
+  app_links: ^7.2.1
 
   # Map
   flutter_naver_map: ^1.2.0
 
   # Location
-  geolocator: ^14.0.2
+  geolocator: ^14.0.3
 
   # Fonts
   google_fonts: ^8.2.1
