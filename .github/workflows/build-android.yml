@@ -1,0 +1,63 @@
+name: Build (Android)
+
+on:
+  workflow_dispatch:
+  schedule:
+    # 매주 월요일 03:00 (KST) = 일요일 18:00 (UTC)
+    - cron: "0 18 * * 0"
+
+permissions:
+  contents: read
+
+jobs:
+  debug-apk:
+    name: Debug APK
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Setup Java
+        uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      # google-services.json 은 저장소에 커밋하지 않으므로 시크릿에서 복원합니다.
+      # 시크릿이 없으면 빌드 단계를 건너뜁니다 (경고만 남김).
+      - name: Restore google-services.json
+        id: google-services
+        env:
+          GOOGLE_SERVICES_JSON: ${{ secrets.GOOGLE_SERVICES_JSON }}
+        run: |
+          if [ -n "$GOOGLE_SERVICES_JSON" ]; then
+            printf '%s' "$GOOGLE_SERVICES_JSON" > android/app/google-services.json
+            echo "available=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "::warning::GOOGLE_SERVICES_JSON 시크릿이 없어 Android 빌드를 건너뜁니다."
+            echo "available=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Install dependencies
+        if: steps.google-services.outputs.available == 'true'
+        run: flutter pub get
+
+      - name: Build debug APK
+        if: steps.google-services.outputs.available == 'true'
+        run: flutter build apk --debug
+
+      - name: Upload APK
+        if: steps.google-services.outputs.available == 'true'
+        uses: actions/upload-artifact@v7
+        with:
+          name: pinple-debug-apk
+          path: build/app/outputs/flutter-apk/app-debug.apk
+          if-no-files-found: error
+          retention-days: 7
