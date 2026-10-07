@@ -32,6 +32,40 @@
 flutter build apk --release --split-per-abi --obfuscate --split-debug-info=build/app/outputs/symbols
 ```
 
+## 🤖 자동화 (CI / Dependabot)
+의존성 관리와 검증은 GitHub Actions + Dependabot 이 담당합니다. 별도 서버나 유료 도구가 필요 없습니다.
+
+| 워크플로 | 실행 시점 | 하는 일 |
+| --- | --- | --- |
+| `CI` | `main` 대상 PR / `main` 푸시 | `flutter analyze` + `flutter test --coverage` |
+| `Build (Android)` | 매주 월요일 03:00 (KST), 수동 실행 | debug APK 빌드 후 아티팩트 업로드 (툴체인/플러그인 호환성 확인용) |
+| `Dependabot auto-merge` | Dependabot PR | patch 업데이트는 CI 통과 시 자동 병합, 나머지는 안내 코멘트 |
+
+### 의존성 자동 업데이트
+* `.github/dependabot.yml` 설정에 따라 **매주 월요일 09:00 (KST)** 에 `pubspec.yaml`, `android/*.gradle.kts`, GitHub Actions 업데이트 PR 이 생성됩니다.
+* minor/patch 는 PR 하나로 묶고, major 는 개별 PR 로 만들어 직접 리뷰합니다.
+* 방금 나온 버전을 바로 올리지 않도록 cooldown 을 둡니다 (patch 7일 / major 30일). 보안 업데이트는 cooldown 이 적용되지 않아 즉시 PR 이 생성됩니다.
+* patch 업데이트 PR 은 필요한 검사(status check)가 통과하면 자동으로 squash 병합됩니다.
+
+### 저장소에서 한 번만 켜면 되는 설정
+1. **Settings → General → Pull requests → Allow auto-merge** 체크 → 자동 병합 활성화
+2. **Settings → Code security → Dependabot alerts / Dependabot security updates** 활성화 → 취약점 알림 + 보안 업데이트 PR
+3. **Settings → Branches → Add branch protection rule** (Branch name pattern: `main`)
+   * `Require status checks to pass` → `Analyze & Test` 선택 (자동 병합이 검사를 기다리게 하는 장치입니다)
+   * (권장) `Require a pull request before merging`
+4. (선택) **Settings → Secrets and variables → Actions → New repository secret** 에 `GOOGLE_SERVICES_JSON` 추가
+   * 값: `android/app/google-services.json` 파일 내용 그대로
+   * 시크릿이 없으면 `Build (Android)` 워크플로는 경고만 남기고 빌드를 건너뜁니다.
+
+### 로컬에서 같은 검사 실행하기
+```bash
+flutter pub get
+flutter analyze
+flutter test --coverage
+flutter pub outdated          # 오래된 의존성 확인
+flutter pub upgrade --major-versions   # 메이저까지 한 번에 올리기 (직접 실행 시)
+```
+
 ## ⚠️ 법적 고지 (Legal Notice)
 **본 프로젝트는 오픈 소스가 아닙니다.** 모든 권리는 저작권자에게 있습니다. 저작권자의 허가 없는 코드의 복제, 수정, 배포 및 포크(Fork)를 엄격히 금지합니다. 소스 코드는 오직 교육적 목적으로만 열람 가능합니다.
 
