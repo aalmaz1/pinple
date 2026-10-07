@@ -55,6 +55,9 @@ yarn-error.log*
 *.mov
 *.avi
 
+# Test coverage (flutter test --coverage)
+coverage/
+
 # Misc
 .metadata
 *.lock
