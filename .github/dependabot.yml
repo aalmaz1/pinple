@@ -1,0 +1,82 @@
+# Dependabot: 의존성을 주기적으로 확인해 업데이트 PR 을 자동으로 만들어 줍니다.
+# 설정 문서: https://docs.github.com/code-security/dependabot/dependabot-version-updates/configuration-options-for-the-dependabot.yml-file
+version: 2
+
+updates:
+  # 1) Flutter / Dart 패키지 (pubspec.yaml, pubspec.lock)
+  - package-ecosystem: "pub"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "Asia/Seoul"
+    open-pull-requests-limit: 5
+    labels:
+      - "dependencies"
+      - "dart"
+    commit-message:
+      prefix: "chore(deps)"
+      include: "scope"
+    # 새 버전이 나오자마자 올리지 않고 안정화될 시간을 줍니다.
+    # (보안 업데이트에는 cooldown 이 적용되지 않습니다 = 즉시 PR 생성)
+    cooldown:
+      default-days: 7
+      semver-major-days: 30
+    groups:
+      # minor + patch 는 PR 하나로 묶어서 노이즈를 줄입니다. (major 는 개별 PR)
+      pub-minor-patch:
+        applies-to: version-updates
+        patterns:
+          - "*"
+        update-types:
+          - "minor"
+          - "patch"
+      # 보안 업데이트도 한 PR 로 묶습니다.
+      pub-security:
+        applies-to: security-updates
+        patterns:
+          - "*"
+
+  # 2) Android Gradle 플러그인 / 라이브러리 (android/*.gradle.kts)
+  - package-ecosystem: "gradle"
+    directory: "/android"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "Asia/Seoul"
+    open-pull-requests-limit: 5
+    labels:
+      - "dependencies"
+      - "android"
+    commit-message:
+      prefix: "chore(gradle)"
+    cooldown:
+      default-days: 14
+      semver-major-days: 30
+    groups:
+      gradle-minor-patch:
+        patterns:
+          - "*"
+        update-types:
+          - "minor"
+          - "patch"
+
+  # 3) 워크플로에서 사용하는 GitHub Actions
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "Asia/Seoul"
+    labels:
+      - "dependencies"
+      - "ci"
+    commit-message:
+      prefix: "ci(deps)"
+    groups:
+      github-actions:
+        patterns:
+          - "*"
