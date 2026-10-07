@@ -1,0 +1,41 @@
+name: Dependabot auto-merge
+
+on: pull_request
+
+# Dependabot 이 트리거한 워크플로는 기본적으로 read-only GITHUB_TOKEN 을 받습니다.
+# permissions 키로 필요한 권한을 명시적으로 올려 줍니다.
+# https://docs.github.com/en/code-security/reference/supply-chain-security/troubleshoot-dependabot/dependabot-on-actions
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  auto-merge:
+    name: Auto-merge patch updates
+    runs-on: ubuntu-latest
+    if: github.event.pull_request.user.login == 'dependabot[bot]'
+    steps:
+      - name: Fetch Dependabot metadata
+        id: metadata
+        uses: dependabot/fetch-metadata@v3
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      # patch 업데이트만 자동 병합합니다. (minor / major 는 직접 리뷰)
+      # minor 까지 자동 병합하려면 아래 if 를 다음으로 바꾸세요:
+      #   steps.metadata.outputs.update-type != 'version-update:semver-major'
+      - name: Enable auto-merge
+        if: steps.metadata.outputs.update-type == 'version-update:semver-patch'
+        run: gh pr merge --auto --squash "$PR_URL"
+        env:
+          PR_URL: ${{ github.event.pull_request.html_url }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # patch 가 아닌 업데이트에는 안내 코멘트만 남기고 사람이 병합하도록 둡니다.
+      - name: Comment on skipped updates
+        if: steps.metadata.outputs.update-type != 'version-update:semver-patch'
+        run: |
+          gh pr comment "$PR_URL" --body "수동 확인이 필요한 업데이트입니다: ${{ steps.metadata.outputs.dependency-names }} (${{ steps.metadata.outputs.update-type }}). CI 가 통과하면 직접 병합해 주세요."
+        env:
+          PR_URL: ${{ github.event.pull_request.html_url }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
