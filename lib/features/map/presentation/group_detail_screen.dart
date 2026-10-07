@@ -471,9 +471,12 @@ class SliverLikeHeader extends StatelessWidget {
                 icon: Icons.share_rounded,
                 onTap: () {
                   HapticFeedback.lightImpact();
-                  Share.share(
-                    '${l10n.shareMessage}\n\nhttps://pinple-5e23e.web.app/group/${group.id}',
-                    subject: group.title,
+                  SharePlus.instance.share(
+                    ShareParams(
+                      text:
+                          '${l10n.shareMessage}\n\nhttps://pinple-5e23e.web.app/group/${group.id}',
+                      subject: group.title,
+                    ),
                   );
                 },
               ),
