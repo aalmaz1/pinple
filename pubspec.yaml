@@ -13,11 +13,11 @@ dependencies:
     sdk: flutter
 
   # Firebase
-  firebase_core: ^4.15.0
-  firebase_auth: ^6.7.0
-  cloud_firestore: ^6.10.0
-  firebase_storage: ^13.6.0
-  firebase_messaging: ^16.7.0
+  firebase_core: ^5.0.0
+  firebase_auth: ^7.0.0
+  cloud_firestore: ^7.0.0
+  firebase_storage: ^14.0.0
+  firebase_messaging: ^17.0.0
 
   # Media
   image_picker: ^1.1.2
@@ -41,6 +41,7 @@ dependencies:
 
   # Settings
   shared_preferences: ^2.3.5
+  shared_preferences_android: ^2.5.1
   http: ^1.3.0
 
 dev_dependencies:
