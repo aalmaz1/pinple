@@ -43,3 +43,12 @@
 -assumenosideeffects class ** {
     static *** assert*(...);
 }
+
+# Kotlin & shared_preferences JNI ProGuard Rules (Prevents R8 crash in release)
+-keep class kotlin.Unit { *; }
+-keep class kotlin.Result { *; }
+-keep class kotlin.Result$Failure { *; }
+-keep class kotlin.coroutines.Continuation { *; }
+-keep class kotlin.coroutines.intrinsics.CoroutineSingletons { *; }
+-keep class kotlin.coroutines.intrinsics.IntrinsicsKt { *; }
+

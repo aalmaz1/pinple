@@ -21,6 +21,8 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
   final _confirmPasswordController = TextEditingController();
   final _nicknameController = TextEditingController();
   bool _isLoading = false;
+  bool _obscurePassword = true;
+  bool _obscureConfirmPassword = true;
 
   @override
   void dispose() {
@@ -85,6 +87,8 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
                         hintText: 'example@smail.kongju.ac.kr',
                       ),
                       keyboardType: TextInputType.emailAddress,
+                      textInputAction: TextInputAction.next,
+                      autofillHints: const [AutofillHints.email],
                       validator: (v) => validateEmail(v, l10n),
                     ),
                     const SizedBox(height: AppSpacing.lg),
@@ -94,6 +98,8 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
                         labelText: l10n.nicknameLabel,
                         hintText: l10n.nicknameHint,
                       ),
+                      textInputAction: TextInputAction.next,
+                      autofillHints: const [AutofillHints.nickname],
                       validator: (v) => validateNickname(v, l10n),
                     ),
                     const SizedBox(height: AppSpacing.lg),
@@ -102,8 +108,21 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
                       decoration: InputDecoration(
                         labelText: l10n.passwordLabel,
                         hintText: l10n.passwordHint,
+                        suffixIcon: IconButton(
+                          icon: Icon(
+                            _obscurePassword
+                                ? Icons.visibility_outlined
+                                : Icons.visibility_off_outlined,
+                            color: AppColors.textSubtle,
+                          ),
+                          onPressed: () {
+                            setState(() => _obscurePassword = !_obscurePassword);
+                          },
+                        ),
                       ),
-                      obscureText: true,
+                      obscureText: _obscurePassword,
+                      textInputAction: TextInputAction.next,
+                      autofillHints: const [AutofillHints.newPassword],
                       validator: (v) => validatePassword(v, l10n),
                     ),
                     const SizedBox(height: AppSpacing.lg),
@@ -111,8 +130,23 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
                       controller: _confirmPasswordController,
                       decoration: InputDecoration(
                         labelText: l10n.confirmPasswordLabel,
+                        suffixIcon: IconButton(
+                          icon: Icon(
+                            _obscureConfirmPassword
+                                ? Icons.visibility_outlined
+                                : Icons.visibility_off_outlined,
+                            color: AppColors.textSubtle,
+                          ),
+                          onPressed: () {
+                            setState(() {
+                              _obscureConfirmPassword = !_obscureConfirmPassword;
+                            });
+                          },
+                        ),
                       ),
-                      obscureText: true,
+                      obscureText: _obscureConfirmPassword,
+                      textInputAction: TextInputAction.done,
+                      onFieldSubmitted: (_) => _isLoading ? null : _signUp(),
                       validator: (value) {
                         if (value != _passwordController.text) {
                           return l10n.passwordMismatch;

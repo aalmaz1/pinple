@@ -20,6 +20,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _isLoading = false;
+  bool _obscurePassword = true;
 
   @override
   void dispose() {
@@ -114,6 +115,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                           hintText: 'name@smail.kongju.ac.kr',
                         ),
                         keyboardType: TextInputType.emailAddress,
+                        textInputAction: TextInputAction.next,
+                        autofillHints: const [AutofillHints.email],
                         validator: (v) => validateEmail(v, l10n),
                       ),
                       const SizedBox(height: AppSpacing.md),
@@ -121,8 +124,22 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         controller: _passwordController,
                         decoration: InputDecoration(
                           labelText: l10n.passwordLabel,
+                          suffixIcon: IconButton(
+                            icon: Icon(
+                              _obscurePassword
+                                  ? Icons.visibility_outlined
+                                  : Icons.visibility_off_outlined,
+                              color: AppColors.textSubtle,
+                            ),
+                            onPressed: () {
+                              setState(() => _obscurePassword = !_obscurePassword);
+                            },
+                          ),
                         ),
-                        obscureText: true,
+                        obscureText: _obscurePassword,
+                        textInputAction: TextInputAction.done,
+                        autofillHints: const [AutofillHints.password],
+                        onFieldSubmitted: (_) => _isLoading ? null : _login(),
                         validator: (v) => validatePassword(v, l10n),
                       ),
                       const SizedBox(height: AppSpacing.xxl),
