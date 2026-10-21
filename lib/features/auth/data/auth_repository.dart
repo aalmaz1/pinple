@@ -55,6 +55,7 @@ class AuthRepository {
 
   Future<void> updateFcmToken(String uid) async {
     try {
+      // ignore: deprecated_member_use
       final token = await _fcm.getToken();
       if (token != null) {
         await _firestore.collection('users').doc(uid).update({
