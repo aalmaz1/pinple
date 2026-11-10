@@ -29,7 +29,7 @@
 ## 🚦 시작하기
 최적화된 릴리스 빌드를 생성하려면 다음 명령어를 실행하세요:
 ```bash
-flutter build apk --release --split-per-abi --obfuscate --split-debug-info=build/app/outputs/symbols
+flutter build apk --release --split-per-abi --obfuscate --split-debug-info=build/app/outputs/symbols --strip
 ```
 
 ## 🤖 자동화 (CI / Dependabot)
