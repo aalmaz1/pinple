@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_naver_map/flutter_naver_map.dart';
 import 'package:pinple/core/constants/app_constants.dart';
 import 'package:pinple/core/constants/campus_constants.dart';

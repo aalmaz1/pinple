@@ -1,7 +1,6 @@
 import 'dart:async';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:app_links/app_links.dart';
-import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:pinple/core/theme/app_theme.dart';
@@ -145,11 +144,7 @@ class _PinpleAppState extends ConsumerState<PinpleApp> {
       themeMode: _mapThemeMode(settings.themeMode),
       locale: settings.locale,
       supportedLocales: const [Locale('ko'), Locale('en'), Locale('ru')],
-      localizationsDelegates: const [
-        GlobalMaterialLocalizations.delegate,
-        GlobalWidgetsLocalizations.delegate,
-        GlobalCupertinoLocalizations.delegate,
-      ],
+      localizationsDelegates: GlobalMaterialLocalizations.delegates,
       routerConfig: router,
     );
   }

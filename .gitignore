@@ -68,3 +68,4 @@ coverage/
 android/key.properties
 *.jks
 *.keystore
+debug-info/
